@@ -1,0 +1,9 @@
+name: weak-supervision-project
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.7  # versioned to match Google Colab
+  - pip=21.1  # versioned to match Google Colab
+  - pip:
+    - pre-commit
