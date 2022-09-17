@@ -1,5 +1,8 @@
 # FSDL 2022: Weak Supervision Project
 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/EdAbati/fsdl-2022-weak-supervision-project/main.svg)](https://results.pre-commit.ci/latest/github/EdAbati/fsdl-2022-weak-supervision-project/main)
+
+
 Authors:
  - ...
 
