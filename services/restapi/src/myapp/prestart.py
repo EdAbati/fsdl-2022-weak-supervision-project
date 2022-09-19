@@ -1,6 +1,12 @@
 import logging
 
-from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
+from tenacity import (
+    after_log,
+    before_log,
+    retry,
+    stop_after_attempt,
+    wait_fixed,
+)
 
 # from app.db.session import SessionLocal
 
@@ -18,11 +24,11 @@ wait_seconds = 1
     after=after_log(logger, logging.WARN),
 )
 def init() -> None:
-    
+
     logger.info("Success! Nothing to do")
-    
+
     # uncomment if a DB is used
-    
+
     # try:
     #     db = SessionLocal()
     #     # Try to create session to check if DB is awake
