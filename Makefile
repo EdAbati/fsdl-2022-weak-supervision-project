@@ -12,12 +12,12 @@ help: ## Print this help
 	@grep -E '^[0-9a-zA-Z_\.-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: conda-env-and-update
-conda-env-and-update: ## install all pre-commit hooks
+conda-env-and-update: ## create and update a virtual environment using conda
 	conda env update --prune -f environment.yml
 	@echo "!!! PLEASE ACTIVATE CONDA ENVIRONMENT !!!"
 
 .PHONY: install-pre-commit
-install-pre-commit: ## create and update a virtual environment using conda
+install-pre-commit: ## install all pre-commit hooks
 	pre-commit install --install-hooks
 
 build: ## build docker image
