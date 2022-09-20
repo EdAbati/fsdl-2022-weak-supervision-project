@@ -84,7 +84,7 @@ services:
   #         - node.labels.${STACK_NAME?Variable not set}.app-db-data == true
 
   restapi:
-    image: "${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}"
+    image: "${DOCKER_IMAGE_RESTAPI?Variable not set}:${RESTAPI_TAG-latest}"
     # depends_on:
     #   - db
     env_file:
@@ -107,7 +107,7 @@ services:
       labels:
         - traefik.enable=true
         - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-        - traefik.http.routers.${STACK_NAME?Variable not set}-restapi-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/webapp`)
+        - traefik.http.routers.${STACK_NAME?Variable not set}-restapi-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)
         - traefik.http.services.${STACK_NAME?Variable not set}-restapi.loadbalancer.server.port=80
     networks:
       - rubrix

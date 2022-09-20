@@ -1,0 +1,66 @@
+[tool.poetry]
+authors = ["example <email@example.com", "example 2 <email2@example.com"]
+description = "A streamlit dashboard"
+name = "fsdl-2022-weak-supervision-project-dashboard"
+version = "0.1.0"
+
+[tool.poetry.scripts]
+fsdl-project-cli = "app.cli:hello"
+
+
+[tool.poetry.dependencies]
+python = "~3.10.2"
+# pydantic = "^1.8"
+# typer = "^0.5.0"
+# tenacity = "^8.0.1"
+streamlit = "^1.12.2"
+requests = "^2.28.1"
+streamlit-aggrid = "^0.3.3"
+
+[tool.poetry.dev-dependencies]
+black = "^22.8.0"
+flake8 = "^5.0.4"
+ipykernel = "^6.15.3"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+log_cli = true
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+log_cli_format = "%(asctime)s [%(levelname)s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_level = "INFO"
+minversion = "6.0"
+testpaths = [
+  "src/tests",
+]
+
+[tool.black]
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+include = '\.pyi?$'
+line-length = 79
+target-version = ['py37']
+
+[tool.isort]
+line_length = 79
+multi_line_output = 3
+profile = "black"
