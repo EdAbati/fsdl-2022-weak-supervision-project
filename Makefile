@@ -4,6 +4,9 @@
 include .env
 export
 
+# help command will parse and color strings after '##' as documentation automatically
+# see https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html for details
+
 .PHONY: help
 help: ## Print this help
 	@grep -E '^[0-9a-zA-Z_\.-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
