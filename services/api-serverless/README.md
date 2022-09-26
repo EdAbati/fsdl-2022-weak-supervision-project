@@ -7,13 +7,14 @@ It includes the following files and folders:
 - `app/Dockerfile` - The Dockerfile to build the container image for local testing.
 - `app/requirements.txt` - The pip requirements installed in the test container.
 
-
 ## Create API locally in a Docker container
 
 Requirements:
+
 - Docker
 
 Start local docker container:
+
 ```bash
 cd services/api-serverless/app
 docker build -t news-model-api .
@@ -21,11 +22,13 @@ docker run -p 9000:8080 news-model-api
 ```
 
 Testing with `curl`:
+
 ```bash
 curl -POST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"text": "A test sentence."}'
 ```
 
 Testing with `python` and `requests`:
+
 ```python
 import json
 
