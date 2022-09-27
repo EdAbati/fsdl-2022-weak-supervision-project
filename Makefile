@@ -90,7 +90,7 @@ build_aws_lambda_image: ## Build AWS Lambda docker image locally
 	docker build -t $(CONTAINER_NAME) . --platform=linux/amd64
 
 .PHONY: run_local_aws_lambda
-run_local_aws_lambda: ## Build AWS Lambda docker image locally
+run_local_aws_lambda: ## Run AWS lambda docker image locally
 	cd services/api-serverless/api && \
 	docker run -p 9000:8080 $(CONTAINER_NAME)
 
