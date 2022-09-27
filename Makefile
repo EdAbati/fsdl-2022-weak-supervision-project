@@ -98,11 +98,12 @@ run_local_aws_lambda: ## Build AWS Lambda docker image locally
 authenticate_aws_ecr: ## Authenticate to AWS ECR
 	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(ECR_URI)
 
+.PHONY: create_aws_ecr_repository
 create_aws_ecr_repository: authenticate_aws_ecr  ## Create a new AWS ECR repository
 	aws ecr create-repository --repository-name $(LAMBDA_AND_CONTAINER_NAME) --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE
 
 .PHONY: deploy_to_ecr
-deploy_to_aws_ecr: build_aws_lambda_image authenticate_aws_ecr  ## Deploy
+deploy_to_aws_ecr: build_aws_lambda_image authenticate_aws_ecr  ## Push image to AWS ECR repository
 	docker tag $(CONTAINER_NAME):latest $(IMAGE_URI):latest
 	docker push $(IMAGE_URI):latest
 
