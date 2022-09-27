@@ -11,21 +11,24 @@ It includes the following files and folders:
 ## Create API locally in a Docker container
 
 Requirements:
-- Docker
 
-Start local docker container:
+- [Docker](https://docs.docker.com/get-docker/)
+
+Create and start the API as a local docker container:
+
 ```bash
-cd services/api-serverless/app
-docker build -t news-model-api .
-docker run -p 9000:8080 news-model-api
+make build_aws_lambda_image
+make run_local_aws_lambda
 ```
 
 Testing with `curl`:
+
 ```bash
 curl -POST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"text": "A test sentence."}'
 ```
 
 Testing with `python` and `requests`:
+
 ```python
 import json
 
@@ -36,3 +39,17 @@ headers = {"Content-Type": "application/json"}
 payload = json.dumps({"text": 'A test sentence.'})
 response = requests.post(url, data=payload, headers=headers)
 ```
+
+## Deploy API to AWS Lambda
+
+Requirements:
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [An AWS Account](https://portal.aws.amazon.com/gp/aws/developer/registration/index.html?nc2=h_ct&src=header_signup)
+- [AWS CLI](https://aws.amazon.com/cli/) installed and configured
+- a `.env` file in the root of this project (based on `.env.sample`). Set the `AWS_ACCOUNT_ID` and `AWS_REGION` variables in this file.
+
+
+1. Create a docker image and push to the ECR repository: `make deploy_to_aws_ecr`
+2. Create a IAM role for the Lambda function: `make create_lambda_role`
+3. Create the Lambda function: `make create_lambda_function`
