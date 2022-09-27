@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.cors import CORSMiddleware
-
 from myapp.api.v1.router import api_router
 from myapp.config import settings
+from starlette.middleware.cors import CORSMiddleware
 
 
 def include_routers(app: FastAPI) -> None:
@@ -15,9 +14,7 @@ def configure_middleware(app: FastAPI) -> None:
     if settings.BACKEND_CORS_ORIGINS:
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=[
-                str(origin) for origin in settings.BACKEND_CORS_ORIGINS
-            ],
+            allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
