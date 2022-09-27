@@ -7,7 +7,6 @@ It includes the following files and folders:
 - `app/Dockerfile` - The Dockerfile to build the container image for local testing.
 - `app/requirements.txt` - The pip requirements installed in the test container.
 
-
 ## Create API locally in a Docker container
 
 Requirements:
