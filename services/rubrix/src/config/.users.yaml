@@ -1,0 +1,6 @@
+# #.users.yaml
+# # Users are provided as a list
+# - username: user1
+#   hashed_password: $2y$05$7VEEPedtZW4uZ3Y64HHbweh1.i5AGLq/Aqy26IPVWCjlKzWS9Al3W # See the previous section above
+#   api_key: "ThisIsTheUser1APIKEY"
+#   workspaces: [] # This user will only have her user workspace available

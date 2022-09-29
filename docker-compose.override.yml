@@ -29,7 +29,7 @@ services:
 
   restapi:
     ports:
-      - "8888:8888"
+      - "8888:80"
     volumes:
       - ./services/restapi/src/myapp:/app/myapp
     environment:
@@ -49,32 +49,25 @@ services:
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)  || PathPrefix(`/webapp`)
       - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=80
+      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=${STACK_NAME?Variable not set}-backend-auth
+      - traefik.http.middlewares.${STACK_NAME?Variable not set}-backend-auth.basicauth.users=user:$$2y$$05$$903CSuS1Cd8qfunjKpLXoO3szTEa2RuVj9MA73EfxeoGjeeuGXHsm
 
-  # db:
-  #   ports:
-  #     - "54320:5432"
-
-
-  # db_test:
-  #   image: postgres:14
-  #   volumes:
-  #     - app-db-data-test:/var/lib/postgresql/data/pgdata
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - PGDATA=/var/lib/postgresql/data/pgdata
-  #     # Postgres testing database
-  #     - POSTGRES_SERVER=${POSTGRES_SERVER_TEST-db_test}
-  #     - POSTGRES_USER=${POSTGRES_USER_TEST-postgres_test}
-  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_TEST-test}
-  #     - POSTGRES_DB=${POSTGRES_DB_TEST-app_test}
-  #   ports:
-  #     - "54321:5432"
+      #   image: postgres:14
+      #   volumes:
+      #     - app-db-data-test:/var/lib/postgresql/data/pgdata
+      #   env_file:
+      #     - .env
+      #   environment:
+      #     - PGDATA=/var/lib/postgresql/data/pgdata
+      #     # Postgres testing database
+      #     - POSTGRES_SERVER=${POSTGRES_SERVER_TEST-db_test}
+      #     - POSTGRES_USER=${POSTGRES_USER_TEST-postgres_test}
+      #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_TEST-test}
+      #     - POSTGRES_DB=${POSTGRES_DB_TEST-app_test}
+      #   ports:
+      #     - "54321:5432"
 
 networks:
   traefik-public:
     # For local dev, don't expect an external Traefik network
     external: false
-
-# volumes:
-#   app-db-data-test:

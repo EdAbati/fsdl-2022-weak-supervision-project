@@ -66,6 +66,8 @@ services:
         # Middleware to redirect www, and redirect HTTP to HTTPS
         # to disable www redirection remove the section: ${STACK_NAME?Variable not set}-www-redirect,
         - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-http.middlewares=${STACK_NAME?Variable not set}-www-redirect,${STACK_NAME?Variable not set}-https-redirect
+  # db_test:
+
 
   # db:
   #   image: postgres:14
@@ -107,11 +109,70 @@ services:
         - traefik.http.routers.${STACK_NAME?Variable not set}-restapi-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/webapp`)
         - traefik.http.services.${STACK_NAME?Variable not set}-restapi.loadbalancer.server.port=80
 
-# volumes:
-#   app-db-data:
+  jupyter:
+    image: "${DOCKER_IMAGE_JUPYTER?Variable not set}:${TAG-latest}"
+    ports:
+      - "8085:8888"
+    # depends_on:
+    #   - db
+    env_file:
+      - .env
+    build:
+      context: ./services/jupyter/src
+      dockerfile: Dockerfile
+    networks:
+      - rubrix
+  rubrix:
+    image: recognai/rubrix:latest
+    restart: unless-stopped
+    ports:
+      - "6900:80"
+    environment:
+      ELASTICSEARCH: http://elasticsearch:9200
+      # RUBRIX_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
+      RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD: ${RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD-$$2y$$05$$X1i7R1R7CeFyD/dxZ5ttu.FcJQbL2Gh30.86OxCxzTXl/BR.RO.6O}
+    # volumes:
+    #   - ./services/rubrix/src/config/.users.yaml:/config/.users.yaml
+    networks:
+      - rubrix
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+    ports:
+      - "9200:9200"
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=es-rubrix-local
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - rubrix
+    volumes:
+      - elasticdata:/usr/share/elasticsearch/data
 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.11.1
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    networks:
+      - rubrix
 networks:
   traefik-public:
     # Allow setting it to false for testing
     external: ${TRAEFIK_PUBLIC_NETWORK_IS_EXTERNAL-true}
+
+volumes:
+  # app-db-data-test:
+  elasticdata:
+
+networks:
+  rubrix:
+    driver: bridge

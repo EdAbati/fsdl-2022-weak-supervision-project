@@ -1,0 +1,9 @@
+# Base requirements
+transformers[tf,torch,sentencepiece,vision,optuna,sklearn,onnxruntime]==4.11.3
+datasets[audio]==1.16.1
+matplotlib
+ipywidgets
+pandas
+numpy
+rubrix[server]==0.17.0
+jupyterlab
