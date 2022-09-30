@@ -166,15 +166,14 @@ services:
       ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
     networks:
       - rubrix
+
 networks:
   traefik-public:
     # Allow setting it to false for testing
     external: ${TRAEFIK_PUBLIC_NETWORK_IS_EXTERNAL-true}
+  rubrix:
+    driver: bridge
 
 volumes:
   # app-db-data-test:
   elasticdata:
-
-networks:
-  rubrix:
-    driver: bridge
