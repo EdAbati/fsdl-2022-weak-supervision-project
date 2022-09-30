@@ -109,21 +109,23 @@ services:
         - traefik.http.routers.${STACK_NAME?Variable not set}-restapi-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/webapp`)
         - traefik.http.services.${STACK_NAME?Variable not set}-restapi.loadbalancer.server.port=80
 
-  # jupyter:
-  #   image: jupyter/datascience-notebook
-  #   volumes:
-  #     - ./services/jupyter/src/notebooks:/home/jovyan/work
-  #   ports:
-  #     - "10000:8888"
-  #   # depends_on:
-  #   #   - db
-  #   env_file:
-  #     - .env
-  #   # build:
-  #   #   context: ./services/jupyter/src
-  #   #   dockerfile: Dockerfile
-  #   networks:
-  #     - rubrix
+  jupyter:
+    image: "${DOCKER_IMAGE_JUPYTER?Variable not set}:${TAG-latest}"
+    build:
+      context: ./services/jupyter/src
+    volumes:
+      - ./services/jupyter/src/notebooks:/src/notebooks
+    ports:
+      - "10000:8888"
+    # depends_on:
+    #   - db
+    env_file:
+      - .env
+    # build:
+    #   context: ./services/jupyter/src
+    #   dockerfile: Dockerfile
+    networks:
+      - rubrix
   rubrix:
     image: recognai/rubrix:latest
     restart: unless-stopped
