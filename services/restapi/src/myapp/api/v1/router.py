@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from myapp.api.v1.endpoints import examples
 
 __doc__ = "main router for the API"
