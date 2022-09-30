@@ -1,0 +1,16 @@
+name: notebook-env
+channels:
+  - pytorch
+  - defaults
+  - pyg
+  - conda-forge
+dependencies:
+  - python=3.8
+  - cudatoolkit=11.3
+  - pytorch==1.12
+  - pip
+  - notebook
+  - ipykernel
+  - ipywidgets
+  - pip:
+      - -r requirements.txt
