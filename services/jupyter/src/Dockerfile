@@ -1,11 +1,10 @@
-from continuumio/miniconda3:latest
-
+FROM continuumio/miniconda3:latest
 
 RUN mkdir -p /src/
 
 WORKDIR /src/
 
-COPY environment.yml /src/environment.yml
+COPY environment.yml requirements.txt /src/
 
 RUN conda env create -f environment.yml
 
