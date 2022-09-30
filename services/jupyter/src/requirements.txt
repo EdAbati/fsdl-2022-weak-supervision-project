@@ -5,3 +5,8 @@ pandas
 numpy
 rubrix[server]==0.17.0
 jupyterlab
+torch
+torchvision
+wandb
+torchmetrics
+pytorch_lightning
