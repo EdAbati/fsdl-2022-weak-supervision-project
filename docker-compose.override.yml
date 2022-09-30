@@ -26,6 +26,12 @@ services:
       - traefik.enable=true
       - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-public-http.rule=Host(`${DOMAIN?Variable not set}`)
       - traefik.http.services.${STACK_NAME?Variable not set}-traefik-public.loadbalancer.server.port=80
+      # - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+      # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.rule=PathPrefix(`/traefik`)
+      # - traefik.http.services.${STACK_NAME?Variable not set}-traefik-dashboard.loadbalancer.server.port=8080
+      # # enable auth on 
+      # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.middlewares=${STACK_NAME?Variable not set}-traefik-dashboard-auth
+      # - traefik.http.middlewares.${STACK_NAME?Variable not set}-traefik-dashboard-auth.basicauth.users=user:$$2y$$05$$903CSuS1Cd8qfunjKpLXoO3szTEa2RuVj9MA73EfxeoGjeeuGXHsm
 
   restapi:
     ports:
@@ -50,21 +56,44 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)  || PathPrefix(`/webapp`)
       - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=80
 
-      #   image: postgres:14
-      #   volumes:
-      #     - app-db-data-test:/var/lib/postgresql/data/pgdata
-      #   env_file:
-      #     - .env
-      #   environment:
-      #     - PGDATA=/var/lib/postgresql/data/pgdata
-      #     # Postgres testing database
-      #     - POSTGRES_SERVER=${POSTGRES_SERVER_TEST-db_test}
-      #     - POSTGRES_USER=${POSTGRES_USER_TEST-postgres_test}
-      #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_TEST-test}
-      #     - POSTGRES_DB=${POSTGRES_DB_TEST-app_test}
-      #   ports:
-      #     - "54321:5432"
+  jupyter:
+    volumes:
+      - ./services/jupyter/src/notebooks:/src/notebooks
+    ports:
+      - "10000:8888"
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+      - traefik.http.routers.${STACK_NAME?Variable not set}-jupyter-http.rule=PathPrefix(`/jupyter`)
+      - traefik.http.services.${STACK_NAME?Variable not set}-jupyter.loadbalancer.server.port=8888
+  rubrix:
+    ports:
+      - "6900:80"
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+      - traefik.http.routers.${STACK_NAME?Variable not set}-rubrix-http.rule=PathPrefix(`/rubrix`)
+      - traefik.http.services.${STACK_NAME?Variable not set}-rubrix.loadbalancer.server.port=80
+      # volumes:
+      #   - ./services/rubrix/src/config/.users.yaml:/config/.users.yaml
 
+  elasticsearch:
+    ports:
+      - "9200:9200"
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+      - traefik.http.routers.${STACK_NAME?Variable not set}-elasticsearch-http.rule=PathPrefix(`/elasticsearch`)
+      - traefik.http.services.${STACK_NAME?Variable not set}-elasticsearch.loadbalancer.server.port=9200
+
+  kibana:
+    ports:
+      - 5601:5601
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+      - traefik.http.routers.${STACK_NAME?Variable not set}-kibana-http.rule=PathPrefix(`/kibana`)
+      - traefik.http.services.${STACK_NAME?Variable not set}-kibana.loadbalancer.server.port=5601
 networks:
   traefik-public:
     # For local dev, don't expect an external Traefik network
