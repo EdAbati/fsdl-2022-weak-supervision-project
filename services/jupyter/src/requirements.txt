@@ -10,3 +10,6 @@ torchvision
 wandb
 torchmetrics
 pytorch_lightning
+seaborn
+scikit-learn
+datasets

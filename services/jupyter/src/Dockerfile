@@ -4,9 +4,11 @@ RUN mkdir -p /src/
 
 WORKDIR /src/
 
-COPY environment.yml requirements.txt /src/
-
+COPY environment.yml /src/
 RUN conda env create -f environment.yml
+
+COPY requirements.txt /src/
+RUN ["conda" ,"run", "--no-capture-output", "-n", "fsdl", "pip", "install", "-r", "requirements.txt"]
 
 # https://github.com/nlp-with-transformers/notebooks
 COPY notebooks /src/notebooks
