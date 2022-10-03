@@ -67,7 +67,7 @@ services:
   #       # Middleware to redirect www, and redirect HTTP to HTTPS
   #       # to disable www redirection remove the section: ${STACK_NAME?Variable not set}-www-redirect,
   #       - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-http.middlewares=${STACK_NAME?Variable not set}-www-redirect,${STACK_NAME?Variable not set}-https-redirect
-  
+
   # db:
   #   image: postgres:14
   #   volumes:
@@ -111,11 +111,13 @@ services:
   #     - rubrix
 
   dev-jupyter-notebook:
+    env_file: .env
+    container_name: ${USER_NAME-test}-dev-jupyter-notebook
     image: dev-notebook:latest
     ports:
       - "10000:8888"
     environment:
-      JUPYTER_TOKEN: "docker"
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN-docker}
     # env_file:
     #   - .env
     build:
@@ -132,8 +134,10 @@ services:
               capabilities: [gpu]
     networks:
       - rubrix
-  
+
   rubrix:
+    env_file: .env
+    container_name: ${USER_NAME-test}-rubrix
     image: recognai/rubrix:latest
     restart: unless-stopped
     ports:
@@ -148,6 +152,8 @@ services:
       - rubrix
 
   elasticsearch:
+    env_file: .env
+    container_name: ${USER_NAME-test}-elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
     ports:
       - "9200:9200"
@@ -167,6 +173,8 @@ services:
       - elasticdata:/usr/share/elasticsearch/data
 
   kibana:
+    env_file: .env
+    container_name: ${USER_NAME-test}-kibana
     image: docker.elastic.co/kibana/kibana:7.11.1
     ports:
       - 5601:5601
@@ -186,4 +194,3 @@ networks:
 volumes:
   # app-db-data-test:
   elasticdata:
-  
