@@ -5,5 +5,13 @@ channels:
 dependencies:
   - python=3.7  # versioned to match Google Colab
   - pip=21.1  # versioned to match Google Colab
+  - pytorch==1.12
+  - notebook
+  - ipykernel
+  - ipywidgets
   - pip:
     - pre-commit
+    - rubrix[listeners]
+    - datasets
+    - small-text
+    - transformers[torch]
