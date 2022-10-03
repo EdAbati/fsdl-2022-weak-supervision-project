@@ -1,100 +1,102 @@
 version: "3.3"
-services:
-  proxy:
-    ports:
-      - "8010:80"
-      - "8090:8080"
-    command:
-      # Enable Docker in Traefik, so that it reads labels from Docker services
-      - --providers.docker
-      # Add a constraint to only use services with the label for this stack
-      # from the env var TRAEFIK_TAG
-      - --providers.docker.constraints=Label(`traefik.constraint-label-stack`, `${TRAEFIK_TAG?Variable not set}`)
-      # Do not expose all Docker services, only the ones explicitly exposed
-      - --providers.docker.exposedbydefault=false
-      # Disable Docker Swarm mode for local development
-      # - --providers.docker.swarmmode
-      # Enable the access log, with HTTP requests
-      - --accesslog
-      # Enable the Traefik log, for configurations and errors
-      - --log
-      # Enable the Dashboard and API
-      - --api
-      # Enable the Dashboard and API in insecure mode for local development
-      - --api.insecure=true
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-public-http.rule=Host(`${DOMAIN?Variable not set}`)
-      - traefik.http.services.${STACK_NAME?Variable not set}-traefik-public.loadbalancer.server.port=80
-      # - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-      # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.rule=PathPrefix(`/traefik`)
-      # - traefik.http.services.${STACK_NAME?Variable not set}-traefik-dashboard.loadbalancer.server.port=8080
-      # # enable auth on
-      # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.middlewares=${STACK_NAME?Variable not set}-traefik-dashboard-auth
-      # - traefik.http.middlewares.${STACK_NAME?Variable not set}-traefik-dashboard-auth.basicauth.users=user:$$2y$$05$$903CSuS1Cd8qfunjKpLXoO3szTEa2RuVj9MA73EfxeoGjeeuGXHsm
+# services:
+  # proxy:
+  #   ports:
+  #     - "8010:80"
+  #     - "8090:8080"
+  #   command:
+  #     # Enable Docker in Traefik, so that it reads labels from Docker services
+  #     - --providers.docker
+  #     # Add a constraint to only use services with the label for this stack
+  #     # from the env var TRAEFIK_TAG
+  #     - --providers.docker.constraints=Label(`traefik.constraint-label-stack`, `${TRAEFIK_TAG?Variable not set}`)
+  #     # Do not expose all Docker services, only the ones explicitly exposed
+  #     - --providers.docker.exposedbydefault=false
+  #     # Disable Docker Swarm mode for local development
+  #     # - --providers.docker.swarmmode
+  #     # Enable the access log, with HTTP requests
+  #     - --accesslog
+  #     # Enable the Traefik log, for configurations and errors
+  #     - --log
+  #     # Enable the Dashboard and API
+  #     - --api
+  #     # Enable the Dashboard and API in insecure mode for local development
+  #     - --api.insecure=true
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-public-http.rule=Host(`${DOMAIN?Variable not set}`)
+  #     - traefik.http.services.${STACK_NAME?Variable not set}-traefik-public.loadbalancer.server.port=80
+  #     # - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+  #     # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.rule=PathPrefix(`/traefik`)
+  #     # - traefik.http.services.${STACK_NAME?Variable not set}-traefik-dashboard.loadbalancer.server.port=8080
+  #     # # enable auth on
+  #     # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.middlewares=${STACK_NAME?Variable not set}-traefik-dashboard-auth
+  #     # - traefik.http.middlewares.${STACK_NAME?Variable not set}-traefik-dashboard-auth.basicauth.users=user:$$2y$$05$$903CSuS1Cd8qfunjKpLXoO3szTEa2RuVj9MA73EfxeoGjeeuGXHsm
 
-  restapi:
-    ports:
-      - "8888:80"
-    volumes:
-      - ./services/restapi/src/myapp:/app/myapp
-    environment:
-      - SERVER_HOST=http://${DOMAIN?Variable not set}
-      - FASTAPI_DEBUG=true
-    build:
-      context: ./services/restapi/src
-      dockerfile: Dockerfile
-      args:
-        BACKEND_APP_MODULE: ${BACKEND_APP_MODULE-app.main:app}
-        BACKEND_PRE_START_PATH: ${BACKEND_PRE_START_PATH-/app/prestart.sh}
-        BACKEND_PROCESS_MANAGER: ${BACKEND_PROCESS_MANAGER-uvicorn}
-        BACKEND_WITH_RELOAD: ${BACKEND_WITH_RELOAD-true}
-        INSTALL_DEV: ${INSTALL_DEV-true}
-    labels:
-      - traefik.enable=true
-      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)  || PathPrefix(`/webapp`)
-      - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=80
+  # restapi:
+  #   ports:
+  #     - "8888:80"
+  #   volumes:
+  #     - ./services/restapi/src/myapp:/app/myapp
+  #   environment:
+  #     - SERVER_HOST=http://${DOMAIN?Variable not set}
+  #     - FASTAPI_DEBUG=true
+  #   build:
+  #     context: ./services/restapi/src
+  #     dockerfile: Dockerfile
+  #     args:
+  #       BACKEND_APP_MODULE: ${BACKEND_APP_MODULE-app.main:app}
+  #       BACKEND_PRE_START_PATH: ${BACKEND_PRE_START_PATH-/app/prestart.sh}
+  #       BACKEND_PROCESS_MANAGER: ${BACKEND_PROCESS_MANAGER-uvicorn}
+  #       BACKEND_WITH_RELOAD: ${BACKEND_WITH_RELOAD-true}
+  #       INSTALL_DEV: ${INSTALL_DEV-true}
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+  #     - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)  || PathPrefix(`/webapp`)
+  #     - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=80
 
-  jupyter:
-    volumes:
-      - ./services/jupyter/src/notebooks:/src/notebooks
-    ports:
-      - "10000:8888"
-    labels:
-      - traefik.enable=true
-      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-      - traefik.http.routers.${STACK_NAME?Variable not set}-jupyter-http.rule=PathPrefix(`/jupyter`)
-      - traefik.http.services.${STACK_NAME?Variable not set}-jupyter.loadbalancer.server.port=8888
-  rubrix:
-    ports:
-      - "6900:80"
-    labels:
-      - traefik.enable=true
-      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-      - traefik.http.routers.${STACK_NAME?Variable not set}-rubrix-http.rule=PathPrefix(`/rubrix`)
-      - traefik.http.services.${STACK_NAME?Variable not set}-rubrix.loadbalancer.server.port=80
-      # volumes:
-      #   - ./services/rubrix/src/config/.users.yaml:/config/.users.yaml
+#   dev-jupyter-notebook:
+#     volumes:
+#       - ./services/jupyter/src/notebooks:/src/notebooks
+#     ports:
+#       - "10000:8888"
+#     labels:
+#       - traefik.enable=true
+#       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+#       - traefik.http.routers.${STACK_NAME?Variable not set}-jupyter-http.rule=PathPrefix(`/jupyter`)
+#       - traefik.http.services.${STACK_NAME?Variable not set}-jupyter.loadbalancer.server.port=8888
+  
+#   rubrix:
+#     ports:
+#       - "6900:80"
+#     labels:
+#       - traefik.enable=true
+#       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+#       - traefik.http.routers.${STACK_NAME?Variable not set}-rubrix-http.rule=PathPrefix(`/rubrix`)
+#       - traefik.http.services.${STACK_NAME?Variable not set}-rubrix.loadbalancer.server.port=80
+#       # volumes:
+#       #   - ./services/rubrix/src/config/.users.yaml:/config/.users.yaml
 
-  elasticsearch:
-    ports:
-      - "9200:9200"
-    labels:
-      - traefik.enable=true
-      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-      - traefik.http.routers.${STACK_NAME?Variable not set}-elasticsearch-http.rule=PathPrefix(`/elasticsearch`)
-      - traefik.http.services.${STACK_NAME?Variable not set}-elasticsearch.loadbalancer.server.port=9200
+#   elasticsearch:
+#     ports:
+#       - "9200:9200"
+#     labels:
+#       - traefik.enable=true
+#       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+#       - traefik.http.routers.${STACK_NAME?Variable not set}-elasticsearch-http.rule=PathPrefix(`/elasticsearch`)
+#       - traefik.http.services.${STACK_NAME?Variable not set}-elasticsearch.loadbalancer.server.port=9200
 
-  kibana:
-    ports:
-      - 5601:5601
-    labels:
-      - traefik.enable=true
-      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-      - traefik.http.routers.${STACK_NAME?Variable not set}-kibana-http.rule=PathPrefix(`/kibana`)
-      - traefik.http.services.${STACK_NAME?Variable not set}-kibana.loadbalancer.server.port=5601
-networks:
-  traefik-public:
-    # For local dev, don't expect an external Traefik network
-    external: false
+#   kibana:
+#     ports:
+#       - 5601:5601
+#     labels:
+#       - traefik.enable=true
+#       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+#       - traefik.http.routers.${STACK_NAME?Variable not set}-kibana-http.rule=PathPrefix(`/kibana`)
+#       - traefik.http.services.${STACK_NAME?Variable not set}-kibana.loadbalancer.server.port=5601
+  
+# networks:
+#   traefik-public:
+#     # For local dev, don't expect an external Traefik network
+#     external: false
