@@ -130,3 +130,6 @@ dmypy.json
 
 # vscode settings
 .vscode/
+
+# small_text active Learning
+.active_learning_lib_cache/
