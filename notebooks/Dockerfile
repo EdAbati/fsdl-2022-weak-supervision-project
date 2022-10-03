@@ -4,7 +4,7 @@ RUN mkdir -p /src/notebooks
 
 WORKDIR /src/notebooks
 
-COPY environment.yml requirements.txt /src/notebooks/
+COPY environment.yml /src/notebooks/
 
 RUN conda env create -f environment.yml
 
