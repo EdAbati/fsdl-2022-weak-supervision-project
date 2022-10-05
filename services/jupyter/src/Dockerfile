@@ -25,7 +25,10 @@ ENV PYTHONFAULTHANDLER=1 \
 WORKDIR /src
 
 RUN apt-get update -qy && \
-	apt-get install -qy --no-install-recommends gcc libc-dev make wget && \
+	apt-get install -qy --no-install-recommends gcc libc-dev make wget git curl && \
+	curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash  && \
+	apt-get install git-lfs && \
+	git lfs install && \
 	python -m pip install --no-cache-dir --upgrade pip "pipx==$PIPX_VERSION" && \
 	pipx install "poetry==$POETRY_VERSION" 
 
