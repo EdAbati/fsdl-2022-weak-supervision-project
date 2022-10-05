@@ -119,6 +119,7 @@ services:
     volumes:
       - ./services/jupyter/src/notebooks:/src/notebooks
       - cachedata:/root/.cache
+      - venvdata:/src/.venv
     ports:
       - "10000:8888"
     # depends_on:
@@ -184,3 +185,4 @@ volumes:
   # app-db-data-test:
   elasticdata:
   cachedata:
+  venvdata:
