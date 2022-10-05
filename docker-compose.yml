@@ -118,6 +118,7 @@ services:
       context: ./services/jupyter/src
     volumes:
       - ./services/jupyter/src/notebooks:/src/notebooks
+      - cachedata:/root/.cache
     ports:
       - "10000:8888"
     # depends_on:
@@ -182,3 +183,4 @@ networks:
 volumes:
   # app-db-data-test:
   elasticdata:
+  cachedata:
