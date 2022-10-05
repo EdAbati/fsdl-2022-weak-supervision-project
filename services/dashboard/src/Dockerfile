@@ -27,7 +27,7 @@ WORKDIR /src
 RUN apt-get update -qy && \
     apt-get install -qy --no-install-recommends gcc libc-dev make wget && \
     python -m pip install --no-cache-dir --upgrade pip "pipx==$PIPX_VERSION" && \
-    pipx install "poetry==$POETRY_VERSION" 
+    pipx install "poetry==$POETRY_VERSION"
 
 # install dependencies
 COPY poetry.lock poetry.toml pyproject.toml /src/
