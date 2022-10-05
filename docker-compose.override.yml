@@ -59,6 +59,7 @@ services:
   jupyter:
     volumes:
       - ./services/jupyter/src/notebooks:/src/notebooks
+      - ./services/jupyter/src/app:/src/app
     ports:
       - "10000:8888"
     labels:
