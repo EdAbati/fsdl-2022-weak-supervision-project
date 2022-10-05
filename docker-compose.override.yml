@@ -60,6 +60,9 @@ services:
     volumes:
       - ./services/jupyter/src/notebooks:/src/notebooks
       - ./services/jupyter/src/app:/src/app
+      - ./services/jupyter/src/pyproject.toml:/src/pyproject.toml
+      - ./services/jupyter/src/poetry.toml:/src/poetry.toml
+      - ./services/jupyter/src/poetry.lock:/src/poetry.lock
     ports:
       - "10000:8888"
     labels:
