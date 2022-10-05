@@ -4,11 +4,13 @@ from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 
 STREAMLIT_AGGRID_URL = "https://github.com/PablocFonseca/streamlit-aggrid"
-st.set_page_config(layout="centered", page_icon="🖱️", page_title="Interactive table app")
+st.set_page_config(
+    layout="centered", page_icon="🖱️", page_title="Interactive table app"
+)
 st.title("🖱️ Interactive table app")
 st.write(
-    """This app shows how you can use the [streamlit-aggrid](STREAMLIT_AGGRID_URL) 
-    Streamlit component in an interactive way so as to display additional content 
+    """This app shows how you can use the [streamlit-aggrid](STREAMLIT_AGGRID_URL)
+    Streamlit component in an interactive way so as to display additional content
     based on user click."""
 )
 
@@ -25,7 +27,9 @@ def aggrid_interactive_table(df: pd.DataFrame):
     Returns:
         dict: The selected row
     """
-    options = GridOptionsBuilder.from_dataframe(df, enableRowGroup=True, enableValue=True, enablePivot=True)
+    options = GridOptionsBuilder.from_dataframe(
+        df, enableRowGroup=True, enableValue=True, enablePivot=True
+    )
 
     options.configure_side_bar()
 
@@ -42,7 +46,9 @@ def aggrid_interactive_table(df: pd.DataFrame):
     return selection
 
 
-iris = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv")
+iris = pd.read_csv(
+    "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv"
+)
 
 selection = aggrid_interactive_table(df=iris)
 

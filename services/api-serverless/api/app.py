@@ -44,6 +44,12 @@ def lambda_handler(event, context):
     event_dict = _json_str_to_dict(event)
     text = load_text(event_dict)
     if text is None:
-        return {"statusCode": 400, "body": {"message": "'text' not found in body of request"}}
+        return {
+            "statusCode": 400,
+            "body": {"message": "'text' not found in body of request"},
+        }
     predictions_dict = get_predicted_labels(text=text)
-    return {"statusCode": 200, "body": json.dumps({"predicted_labels": predictions_dict})}
+    return {
+        "statusCode": 200,
+        "body": json.dumps({"predicted_labels": predictions_dict}),
+    }
