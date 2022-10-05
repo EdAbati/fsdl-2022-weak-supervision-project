@@ -1,0 +1,11 @@
+# enable GPU usage https://gist.github.com/charlesfrye/e27adfc47129a4c209f6dfcb14467fba
+version: "3.3"
+services:
+  jupyter:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: [ '0', '1' ]
+              capabilities: [ gpu ]
