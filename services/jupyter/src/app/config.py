@@ -13,12 +13,6 @@ class SettingsModeEnum(str, enum.Enum):
 
 
 class Settings(BaseSettings):
-    DASHBOARD_MODE: SettingsModeEnum = SettingsModeEnum.DEV
-    DASHBOARD_DEBUG: bool = False
-    SECRET_KEY: str = os.getenv("SECRET_KEY") or secrets.token_urlsafe(32)
-    ALGORITHM: str = "HS256"
-    SERVER_NAME: str
-    SERVER_HOST: AnyHttpUrl
 
     PROJECT_NAME: str
     SENTRY_DSN: Optional[HttpUrl] = None
@@ -29,9 +23,7 @@ class Settings(BaseSettings):
             return None
         return v
 
-    BACKEND_CORS_ORIGINS: Optional[list[str]] = None
-
-    API_DOCKER_TAG: str = "latest"
-
+    HF_TOKEN: Optional[str] = None
+    WANDB_API_KEY: Optional[str] = None
 
 settings = Settings()
