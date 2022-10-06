@@ -1,6 +1,6 @@
 from typing import Optional
-import typer
 
+import typer
 from app.config import SettingsModeEnum, settings
 
 app = typer.Typer()

@@ -1,6 +1,7 @@
 from typing import Optional
 
 import pandas as pd
+from app.config import settings
 from datasets import Dataset, load_dataset
 from transformers import (
     AutoConfig,
@@ -8,8 +9,6 @@ from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
 )
-
-from app.config import settings
 
 
 def load_data(dataset_uri: str = "bergr7/weakly_supervised_ag_news") -> tuple:
@@ -104,7 +103,6 @@ def train_model(
     )
 
     trainer.train()
-    
 
 
 # %%

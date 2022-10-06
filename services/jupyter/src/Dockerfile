@@ -30,7 +30,7 @@ RUN apt-get update -qy && \
 	apt-get install git-lfs && \
 	git lfs install && \
 	python -m pip install --no-cache-dir --upgrade pip "pipx==$PIPX_VERSION" && \
-	pipx install "poetry==$POETRY_VERSION" 
+	pipx install "poetry==$POETRY_VERSION"
 
 # install dependencies
 COPY poetry.lock poetry.toml pyproject.toml /src/
