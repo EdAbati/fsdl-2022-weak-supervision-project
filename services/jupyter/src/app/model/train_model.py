@@ -20,21 +20,21 @@ def load_data(dataset_uri: str = "bergr7/weakly_supervised_ag_news") -> tuple:
 
 
 def get_model(
-    hidden_dp: float,
-    n_layers: int,
+    # hidden_dp: float,
+    # n_layers: int,
     model_ckpt: str,
 ):
 
     _num_labels: int = 4
 
-    config = AutoConfig.from_pretrained(model_ckpt, num_labels=_num_labels)
-    config.hidden_dropout_prob = hidden_dp
+    # config = AutoConfig.from_pretrained(model_ckpt, num_labels=_num_labels)
+    # config.hidden_dropout_prob = hidden_dp
     # config.attention_probs_dropout_prob = 0.1
-    config.n_layers = n_layers
+    # config.n_layers = n_layers
 
-    model = AutoModelForSequenceClassification.from_config(config)
+    model = AutoModelForSequenceClassification.from_pretrained(model_ckpt,num_labels=_num_labels)
 
-    model.from_pretrained(model_ckpt, num_labels=_num_labels)
+    #model.from_pretrained(model_ckpt, num_labels=_num_labels)
 
     return model
 
@@ -58,7 +58,7 @@ def train_model(
     model,
     wandb_name: str,
     model_ckpt: str,
-    epochs: int = 4,
+    epochs: int = 1,
     batch_size: int = 64,
 ):
 
@@ -113,8 +113,8 @@ if __name__ == "__main__":
     model_ckpt = "distilbert-base-uncased"
 
     model = get_model(
-        hidden_dp=0.1,
-        n_layers=4,
+        # hidden_dp=0.1,
+        # n_layers=4,
         model_ckpt=model_ckpt,
     )
 
@@ -123,5 +123,5 @@ if __name__ == "__main__":
         wandb_name=model_ckpt + "_test",
         model_ckpt=model_ckpt,
         epochs=1,
-        batch_size=32,
+        batch_size=64,
     )
