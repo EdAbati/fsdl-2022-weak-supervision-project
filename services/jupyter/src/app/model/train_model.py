@@ -32,9 +32,9 @@ def get_model(
     # config.attention_probs_dropout_prob = 0.1
     # config.n_layers = n_layers
 
-    model = AutoModelForSequenceClassification.from_pretrained(model_ckpt,num_labels=_num_labels)
+    model = AutoModelForSequenceClassification.from_pretrained(model_ckpt, num_labels=_num_labels)
 
-    #model.from_pretrained(model_ckpt, num_labels=_num_labels)
+    # model.from_pretrained(model_ckpt, num_labels=_num_labels)
 
     return model
 
