@@ -1,111 +1,75 @@
+import joblib
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import streamlit as st
-from st_aggrid import AgGrid, GridOptionsBuilder
-from st_aggrid.shared import GridUpdateMode
+from transformers import pipeline
 
-STREAMLIT_AGGRID_URL = "https://github.com/PablocFonseca/streamlit-aggrid"
-st.set_page_config(
-    layout="centered", page_icon="🖱️", page_title="Interactive table app"
-)
-st.title("🖱️ Interactive table app")
-st.write(
-    """This app shows how you can use the [streamlit-aggrid](STREAMLIT_AGGRID_URL)
-    Streamlit component in an interactive way so as to display additional content
-    based on user click."""
-)
+model_id = "KushalRamaiya/distilbert-base-uncased-finetuned-news"
+classifer = pipeline("text-classification", model=model_id)
 
 
-st.write("Go ahead, click on a row in the table below!")
+def classify_news(text):
+    preds = classifer(text, return_all_scores=False)
+    label = {0: "World", 1: "Sports", 2: "Business", 3: "Sci/Tech"}
+    text_label = label.get(int(preds[0]["label"][-1]))
+    preds = classifer(text, return_all_scores=True)
+    for items in preds[0]:
+        items["label"] = label.get(int(items["label"][-1]))
+
+    return text_label, preds[0]
 
 
-def aggrid_interactive_table(df: pd.DataFrame):
-    """Creates an st-aggrid interactive table based on a dataframe.
+def main():
+    st.title("News Classifer App")
+    menu = ["Home", "Saved Logs", "About"]
+    choice = st.sidebar.selectbox("Menu", menu)
+    raw_text = ""
 
-    Args:
-        df (pd.DataFrame]): Source dataframe
+    if choice == "Home":
+        st.subheader("Classify News from Headlines")
+        with st.form(key="news_clf_form"):
+            raw_text = st.text_area("Type Here")
+            submit_text = st.form_submit_button(label="Submit")
+        if submit_text:
+            col1, col2 = st.columns(2)
 
-    Returns:
-        dict: The selected row
-    """
-    options = GridOptionsBuilder.from_dataframe(
-        df, enableRowGroup=True, enableValue=True, enablePivot=True
-    )
+            pred_label, pred_prob = classify_news(raw_text)
+            with col1:
+                st.success("Original Text")
+                st.write(raw_text)
+                st.success("Prediction")
+                st.write(pred_label)
 
-    options.configure_side_bar()
+            with col2:
+                st.success("Prediction Probability")
+                preds_df = pd.DataFrame(pred_prob)
+                st.write(preds_df)
+                labels = ["World", "Sports", "Business", "Sci/Tech"]
+                plt.bar(labels, 100 * preds_df["score"], color="C0")
+                plt.title(f'"{raw_text}"')
+                plt.ylabel("Class Probability (%)")
+                st.pyplot(fig=plt)
 
-    options.configure_selection("single")
-    selection = AgGrid(
-        df,
-        enable_enterprise_modules=True,
-        gridOptions=options.build(),
-        theme="material",
-        update_mode=GridUpdateMode.MODEL_CHANGED,
-        allow_unsafe_jscode=True,
-    )
+    if choice == "Saved Logs":
+        st.subheader("Logs")
+        # data = pd.DataFrame(columns=["Text","Probability"])
+        # st.text("Logs")
+        # df_log_process = st.dataframe(data)
 
-    return selection
+        # if submit_text:
+        #     data = data.append(
+        #         {
+        #             'Text':raw_text,
+        #             'Probability':"something",
+        #         }, ignore_index=True)
 
+        #     df_log_process = df_log_process.dataframe(data)
 
-iris = pd.read_csv(
-    "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv"
-)
-
-selection = aggrid_interactive_table(df=iris)
-
-if selection:
-    st.write("You selected:")
-    st.json(selection["selected_rows"])
-
-st.write("## Code")
-
-st.code(
-    '''
-import pandas as pd
-import streamlit as st
-from st_aggrid import AgGrid, GridOptionsBuilder
-from st_aggrid.shared import GridUpdateMode
-
-iris = pd.read_csv(
-    "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv"
-)
-
-def aggrid_interactive_table(df: pd.DataFrame):
-    """Creates an st-aggrid interactive table based on a dataframe.
-
-    Args:
-        df (pd.DataFrame]): Source dataframe
-
-    Returns:
-        dict: The selected row
-    """
-    options = GridOptionsBuilder.from_dataframe(
-        df, enableRowGroup=True, enableValue=True, enablePivot=True
-    )
-
-    options.configure_side_bar()
-
-    options.configure_selection("single")
-    selection = AgGrid(
-        df,
-        enable_enterprise_modules=True,
-        gridOptions=options.build(),
-        theme="light",
-        update_mode=GridUpdateMode.MODEL_CHANGED,
-        allow_unsafe_jscode=True,
-    )
-
-    return selection
+    if choice == "About":
+        st.subheader("About")
+    pass
 
 
-iris = pd.read_csv(
-    "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv"
-)
-
-selection = aggrid_interactive_table(df=iris)
-
-if selection:
-    st.write("You selected:")
-    st.json(selection["selected_rows"])
-''',
-    "python",
-)
+if __name__ == "__main__":
+    main()
