@@ -70,6 +70,16 @@ services:
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
       - traefik.http.routers.${STACK_NAME?Variable not set}-jupyter-http.rule=PathPrefix(`/jupyter`)
       - traefik.http.services.${STACK_NAME?Variable not set}-jupyter.loadbalancer.server.port=8888
+  streamlit-ui:
+    volumes:
+      - ./services/streamlit-ui/src/app:/src/app
+      - ./services/streamlit-ui/src/poetry.lock:/src/poetry.lock
+      - ./services/streamlit-ui/src/pyproject.lock:/src/pyproject.lock
+      - ./services/streamlit-ui/src/poetry.toml:/src/poetry.toml
+      # - ./services/streamlit-ui/src/.streamlit:/root/.streamlit
+    ports:
+      - "8030:80"
+
   rubrix:
     ports:
       - "6900:80"
