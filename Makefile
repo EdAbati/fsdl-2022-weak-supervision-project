@@ -50,31 +50,6 @@ dev.all.ps: ## start docker-compose ps
 dev.all.down: ## stop docker-compose in dev mode
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml down
 
-dev.restapi.shell: ## open shell in restapi container
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml exec restapi bash
-
-dev.restapi.test: ## open shell in restapi container
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml exec restapi pytest
-
-dev.restapi.tempshell: ## open temp shell in restapi container using run --rm
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml run --rm --entrypoint bash restapi
-
-dev.restapi.up: ## launch restapi service in detached mode
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d restapi
-
-dev.restapi.down: ## stop restapi service
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml down restapi
-
-dev.restapi.build: ## build restapi container
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml build restapi
-
-dev.db.shell: ## open shell in restapi container
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml exec db bash
-
-dev.restapi.logs: ## fetch logs from restapi container
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml logs -ft restapi
-
-
 # AWS API related actions
 # Based on the Makefile of https://github.com/caseyfitz/cookiecutter-disco-pie
 
