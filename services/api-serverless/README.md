@@ -39,6 +39,8 @@ payload = json.dumps({"text": 'A test sentence.'})
 response = requests.post(url, data=payload, headers=headers)
 ```
 
+Testing running the code in the [`notebooks/query_model_api.ipynb`](../../notebooks/query_model_api.ipynb) notebook.
+
 ## Deploy API to AWS Lambda
 
 Requirements:
