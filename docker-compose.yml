@@ -109,6 +109,7 @@ services:
       - WANDB_LOG_MODEL=true
       - WANDB_DIR=/src/wandb
       - WANDB_API_KEY=${WANDB_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
       - PROJECT_NAME=${PROJECT_NAME}
     networks:
       - rubrix
