@@ -1,7 +1,9 @@
-from typing import Optional
+from typing import Any, Optional
 
 import pandas as pd
+import wandb
 from datasets import ClassLabel, Dataset, Features, Value, load_dataset
+from pydantic import BaseModel
 from transformers import (
     AutoConfig,
     AutoModelForSequenceClassification,
@@ -20,6 +22,7 @@ def load_data(dataset_name: str = "bergr7/weakly_supervised_ag_news") -> tuple:
         "validation": "validation.csv",
         "test": "test.csv",
     }
+
     unlabeled_data_files = {"unlabeled": "unlabeled_train.csv"}
     # features
     labeled_features = Features(
@@ -48,13 +51,20 @@ def load_data(dataset_name: str = "bergr7/weakly_supervised_ag_news") -> tuple:
         split="validation",
     )
 
+    labeled_dataset_test = load_dataset(
+        dataset_name,
+        data_files=labeled_data_files,
+        features=labeled_features,
+        split="test",
+    )
+
     unlabeled_dataset = load_dataset(
         dataset_name,
         data_files=unlabeled_data_files,
         features=unlabeled_features,
     )
 
-    return labeled_dataset_train, labeled_dataset_val
+    return labeled_dataset_train, labeled_dataset_val, labeled_dataset_test
 
 
 def get_model(
@@ -94,6 +104,21 @@ def compute_metrics(pred):
 from transformers import Trainer, TrainingArguments
 
 
+def test_model(model, test_data, tokenizer):
+
+    trainer = Trainer(
+        model=model,
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics,
+    )
+
+    model.eval()
+
+    trainer.predict(test_data)
+
+    return trainer
+
+
 def train_model(
     model,
     wandb_name: str,
@@ -102,7 +127,7 @@ def train_model(
     batch_size: int = 64,
 ):
 
-    train_dataset, val_dataset = load_data()
+    train_dataset, val_dataset, _ = load_data()
 
     tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
 
@@ -144,11 +169,62 @@ def train_model(
 
     trainer.train()
 
+    return trainer
+
+
+class WandbModelArtifact(BaseModel):
+
+    entity: str
+    project: str
+    artifact_name: str
+    tag: str
+
+    def __str__(self):
+        return f"{self.entity}/{self.project}/{self.artifact_name}:{self.tag}"
+
+
+NUM_LABELS = 4
+
+
+def test_routine(model: Optional[Any] = None):
+
+    model_ckpt = "distilbert-base-uncased"
+
+    _, _, test_dataset = load_data()
+
+    if model is None:
+        w = WandbModelArtifact(
+            entity="team_44",
+            project="model-registry",
+            artifact_name="distilbert-base-uncased-finetuned-news",
+            tag="v0",
+        )
+
+        run = wandb.init()
+        artifact = run.use_artifact(str(w), type="model")
+        artifact_dir = artifact.download()
+
+        model = AutoModelForSequenceClassification.from_pretrained(
+            artifact_dir,
+            num_labels=NUM_LABELS,
+            torchscript=True,
+        )
+
+    # test model
+    tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
+
+    def tokenize(batch):
+        return tokenizer(batch["text"], padding=True, truncation=True)
+
+    test_encoded = test_dataset.map(tokenize, batched=True, batch_size=None)
+
+    results = test_model(model, test_encoded, tokenizer)
+
 
 # %%
 
 
-if __name__ == "__main__":
+def train_routine():
 
     model_ckpt = "distilbert-base-uncased"
 
@@ -158,10 +234,15 @@ if __name__ == "__main__":
         model_ckpt=model_ckpt,
     )
 
-    train_model(
+    trainer = train_model(
         model,
         wandb_name=model_ckpt + "_test",
         model_ckpt=model_ckpt,
         epochs=1,
         batch_size=64,
     )
+
+
+if __name__ == "__main__":
+    # train_routine()
+    test_routine()
