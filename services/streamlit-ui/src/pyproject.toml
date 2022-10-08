@@ -1,11 +1,14 @@
 [tool.poetry]
-authors = ["example <email@example.com", "example 2 <email2@example.com"]
+authors = ["example <email@example.com>", "example 2 <email2@example.com>"]
 description = "A streamlit dashboard"
 name = "fsdl-2022-weak-supervision-project-dashboard"
 version = "0.1.0"
+packages = [
+	{ include = "app" }
+]
 
 [tool.poetry.scripts]
-fsdl-project-cli = "app.cli:hello"
+fsdl-project-cli = "app.cli:app"
 
 
 [tool.poetry.dependencies]
@@ -16,6 +19,10 @@ streamlit-aggrid = "^0.3.3"
 joblib = "^1.2.0"
 torch = "^1.12.1"
 matplotlib = "^3.6.0"
+transformers = "^4.22.2"
+altair = "^4.2.0"
+pydantic = "^1.10.2"
+typer = "^0.6.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
