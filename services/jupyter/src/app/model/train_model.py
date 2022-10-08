@@ -1,7 +1,6 @@
 from typing import Optional
 
 import pandas as pd
-from app.config import settings
 from datasets import Dataset, load_dataset
 from transformers import (
     AutoConfig,
@@ -9,6 +8,8 @@ from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
 )
+
+from app.config import settings
 
 
 def load_data(dataset_uri: str = "bergr7/weakly_supervised_ag_news") -> tuple:
@@ -32,7 +33,9 @@ def get_model(
     # config.attention_probs_dropout_prob = 0.1
     # config.n_layers = n_layers
 
-    model = AutoModelForSequenceClassification.from_pretrained(model_ckpt, num_labels=_num_labels)
+    model = AutoModelForSequenceClassification.from_pretrained(
+        model_ckpt, num_labels=_num_labels
+    )
 
     # model.from_pretrained(model_ckpt, num_labels=_num_labels)
 

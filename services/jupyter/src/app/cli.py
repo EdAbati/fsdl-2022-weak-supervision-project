@@ -1,6 +1,7 @@
 from typing import Optional
 
 import typer
+
 from app.config import SettingsModeEnum, settings
 
 app = typer.Typer()
@@ -9,9 +10,15 @@ app = typer.Typer()
 @app.command()
 def train(
     p1: float = typer.Argument(..., help="hidden dropout probability"),
-    p2: Optional[float] = typer.Argument(None, help="hidden dropout probability"),
-    wandb_name: str = typer.Argument(..., help="Name for Weights and Biases Logging"),
-    num_layers: int = typer.Argument(..., help="number of layers in the model"),
+    p2: Optional[float] = typer.Argument(
+        None, help="hidden dropout probability"
+    ),
+    wandb_name: str = typer.Argument(
+        ..., help="Name for Weights and Biases Logging"
+    ),
+    num_layers: int = typer.Argument(
+        ..., help="number of layers in the model"
+    ),
 ):
     pass
 
