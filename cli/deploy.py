@@ -9,7 +9,8 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 # Paths
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_MODELS_PATH = PROJECT_ROOT / "models"
-DEFAULT_MODEL_PATH = LOCAL_MODELS_PATH / "traced_model.pt"
+LOCAL_WANDB_ARTIFACTS_PATH = LOCAL_MODELS_PATH / "wandb_artifacts"
+DEFAULT_TRACED_MODEL_PATH = LOCAL_MODELS_PATH / "traced_model.pt"
 
 # Model Constants
 DEFAULT_PRETRAINED_MODEL_NAME = "distilbert-base-uncased"
@@ -35,7 +36,7 @@ def register_artifact(artifact_name: str, model_name: str, model_alias: str = "p
 
 def convert_model_to_torchscript(model_dir: str) -> torch.jit.ScriptModule:
     """Convert a saved model into TorchScript using tracing."""
-    print(f"Loading model from path '{model_dir}'")
+    print(f"Loading model from path '{model_dir}'...")
     model = AutoModelForSequenceClassification.from_pretrained(model_dir, num_labels=NUM_LABELS, torchscript=True)
     # First row in 'ag_news' training dataset
     dummy_input = {
@@ -44,18 +45,21 @@ def convert_model_to_torchscript(model_dir: str) -> torch.jit.ScriptModule:
     }
     tokenizer = AutoTokenizer.from_pretrained(DEFAULT_PRETRAINED_MODEL_NAME)
     dummy_tokenized_input = tokenizer(dummy_input["text"], truncation=True, return_tensors="pt")
-    print("Converting model to TorchScript")
+    print("Converting model to TorchScript...")
     return torch.jit.trace(model, tuple(dummy_tokenized_input.values()))
 
 
 @app.command()
 def stage_model(artifact_name: str, model_name: str, model_alias: str = "prod"):
+    """Register a model in the Model Registry, convert it to TorchScript and store it locally."""
     model_artifact = register_artifact(artifact_name, model_name, model_alias)
-    model_local_dir = model_artifact.download()
+    model_local_dir = model_artifact.download(root=LOCAL_WANDB_ARTIFACTS_PATH)
+    print(f"Saved artifact model to '{LOCAL_WANDB_ARTIFACTS_PATH}'")
     traced_model = convert_model_to_torchscript(model_dir=model_local_dir)
-
-    torch.jit.save(traced_model, DEFAULT_MODEL_PATH)
-    return DEFAULT_MODEL_PATH
+    print(f"Saving traced model in '{DEFAULT_TRACED_MODEL_PATH}'...")
+    torch.jit.save(traced_model, DEFAULT_TRACED_MODEL_PATH)
+    print("[green]Model successfully registered, converted and saved![/green]")
+    return DEFAULT_TRACED_MODEL_PATH
 
 
 if __name__ == "__main__":
