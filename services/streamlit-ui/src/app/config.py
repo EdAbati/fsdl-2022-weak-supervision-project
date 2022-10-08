@@ -17,8 +17,6 @@ class Settings(BaseSettings):
     DASHBOARD_DEBUG: bool = False
     SECRET_KEY: str = os.getenv("SECRET_KEY") or secrets.token_urlsafe(32)
     ALGORITHM: str = "HS256"
-    SERVER_NAME: str
-    SERVER_HOST: AnyHttpUrl
 
     PROJECT_NAME: str
     SENTRY_DSN: Optional[HttpUrl] = None
@@ -28,10 +26,6 @@ class Settings(BaseSettings):
         if bool(v) is False:
             return None
         return v
-
-    BACKEND_CORS_ORIGINS: Optional[list[str]] = None
-
-    API_DOCKER_TAG: str = "latest"
 
 
 settings = Settings()
