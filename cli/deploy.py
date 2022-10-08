@@ -24,10 +24,17 @@ def register_artifact(artifact_name: str, model_name: str, model_alias: str = "p
     """Register WandB artifact in the Model Registry"""
     api = wandb.Api()
     artifact = api.artifact(artifact_name)
-    is_linked = artifact.link(target_path=model_name, aliases=[model_alias])
+    try:
+        is_linked = artifact.link(target_path=model_name, aliases=[model_alias])
+    except wandb.errors.CommError as comm_error:
+        if str(comm_error) == "Permission denied, ask the project owner to grant you access":
+            raise ValueError(
+                f"Model registry '{model_name}' not found. " "Please make sure you have create it using the W&B UI."
+            )
     if is_linked:
         print(
-            f"[green]Model [bold]'{artifact_name}'[/bold] successfully registered with name [bold]'{model_name}'[/bold] with model alias: [bold]'{model_alias}'[/bold][/green]"
+            f"[green]Model [bold]'{artifact_name}'[/bold] successfully registered with "
+            f"name [bold]'{model_name}'[/bold] with model alias: [bold]'{model_alias}'[/bold][/green]"
         )
         model_registry_url = f"https://wandb.ai/{artifact.entity}/registry/model?selectionPath={model_name}"
         print(f"View at URL: [bold]{model_registry_url}[/bold]")
