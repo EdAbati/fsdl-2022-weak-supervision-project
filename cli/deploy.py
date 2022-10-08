@@ -57,7 +57,15 @@ def convert_model_to_torchscript(model_dir: str) -> torch.jit.ScriptModule:
 
 
 @app.command()
-def stage_model(artifact_name: str, model_name: str, model_alias: str = "prod"):
+def register_and_convert_model(
+    artifact_name: str = typer.Argument(
+        ..., help="The name of the W&B model artifact to be used in the format [entity]/[project]/[name]:[alias]"
+    ),
+    model_name: str = typer.Argument(
+        ..., help="The name of the W&B model in the registry in the format [entity]/[project]/[name]"
+    ),
+    model_alias: str = typer.Argument(default="prod", help="A new alias to attach to the model."),
+):
     """Register a model in the Model Registry, convert it to TorchScript and store it locally."""
     model_artifact = register_artifact(artifact_name, model_name, model_alias)
     model_local_dir = model_artifact.download(root=LOCAL_WANDB_ARTIFACTS_PATH)
