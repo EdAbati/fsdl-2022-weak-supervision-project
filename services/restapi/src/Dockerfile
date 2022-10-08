@@ -22,3 +22,6 @@ ENV APP_MODULE=${BACKEND_APP_MODULE} PRE_START_PATH=${BACKEND_PRE_START_PATH} PR
 
 # copy the rest of the app
 COPY myapp /app/myapp
+
+# install entrypoint
+RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install; else poetry install --no-dev ; fi"

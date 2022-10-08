@@ -37,6 +37,9 @@ RUN poetry install --no-dev --no-interaction --no-root
 COPY app /src/app
 COPY .streamlit /root/.streamlit
 
+# install entrypoint
+RUN poetry install --no-dev --no-interaction
+
 EXPOSE 80
 
 ENTRYPOINT ["streamlit"]
