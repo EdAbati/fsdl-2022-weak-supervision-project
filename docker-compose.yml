@@ -107,23 +107,27 @@ services:
       - "10000:8888"
     environment:
       - WANDB_LOG_MODEL=true
-      - WANDB_DIR=/src/wandb
+      - WANDB_DIR=/src
       - WANDB_API_KEY=${WANDB_API_KEY}
       - HF_TOKEN=${HF_TOKEN}
       - PROJECT_NAME=${PROJECT_NAME}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
     networks:
       - rubrix
-  streamlit:
+  streamlit-ui:
     image: "${DOCKER_IMAGE_STREAMLIT_UI?Variable not set}:${TAG-latest}"
     build:
-      context: ./services/streamlit/src
+      context: ./services/streamlit-ui/src
     env_file:
       - .env
     networks:
       - rubrix
     volumes:
-      - streamlit-cachedata:/root/.cache
-      - streamlit-venvdata:/src/.venv
+      - streamlit-ui-cachedata:/root/.cache
+      - streamlit-ui-venvdata:/src/.venv
   rubrix:
     image: recognai/rubrix:latest
     restart: unless-stopped
@@ -187,5 +191,5 @@ volumes:
   elasticdata:
   jupyter-cachedata:
   jupyter-venvdata:
-  streamlit-cachedata:
-  streamlit-venvdata:
+  streamlit-ui-cachedata:
+  streamlit-ui-venvdata:

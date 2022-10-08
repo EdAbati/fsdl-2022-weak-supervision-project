@@ -1,6 +1,8 @@
 from typing import Any, Optional
 
+import boto3
 import pandas as pd
+import torch
 import wandb
 from datasets import ClassLabel, Dataset, Features, Value, load_dataset
 from pydantic import BaseModel
@@ -186,29 +188,58 @@ class WandbModelArtifact(BaseModel):
 NUM_LABELS = 4
 
 
+def upload_to_s3_bucket(
+    torchscript_dir: str = "model.pt",
+    bucket_name: str = "fsdl-model-test",
+    s3_filename: str = "model.pt",
+):
+    s3 = boto3.client(
+        "s3",
+        settings.AWS_REGION,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    )
+
+    # upload file from local directory to s3 bucket
+    with open(torchscript_dir, "rb") as f:
+        s3.upload_fileobj(f, bucket_name, s3_filename)
+
+
+def load_model_from_wandb(
+    artifact_params: WandbModelArtifact, return_dir: bool = False
+):
+
+    run = wandb.init()
+    artifact = run.use_artifact(str(artifact_params), type="model")
+    artifact_dir = artifact.download()
+
+    if return_dir:
+        return artifact_dir
+
+    model = AutoModelForSequenceClassification.from_pretrained(
+        artifact_dir,
+        num_labels=NUM_LABELS,
+        torchscript=True,
+    )
+
+    return model
+
+
 def test_routine(model: Optional[Any] = None):
 
     model_ckpt = "distilbert-base-uncased"
 
     _, _, test_dataset = load_data()
 
+    w = WandbModelArtifact(
+        entity="team_44",
+        project="model-registry",
+        artifact_name="distilbert-base-uncased-finetuned-news",
+        tag="v0",
+    )
+
     if model is None:
-        w = WandbModelArtifact(
-            entity="team_44",
-            project="model-registry",
-            artifact_name="distilbert-base-uncased-finetuned-news",
-            tag="v0",
-        )
-
-        run = wandb.init()
-        artifact = run.use_artifact(str(w), type="model")
-        artifact_dir = artifact.download()
-
-        model = AutoModelForSequenceClassification.from_pretrained(
-            artifact_dir,
-            num_labels=NUM_LABELS,
-            torchscript=True,
-        )
+        load_model_from_wandb(w)
 
     # test model
     tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
@@ -221,7 +252,53 @@ def test_routine(model: Optional[Any] = None):
     results = test_model(model, test_encoded, tokenizer)
 
 
+def convert_model_to_torchscript(
+    model_dir: str, model_ckpt: str
+) -> torch.jit.ScriptModule:
+    """Convert a saved model into TorchScript using tracing."""
+
+    model = AutoModelForSequenceClassification.from_pretrained(
+        model_dir, num_labels=NUM_LABELS, torchscript=True
+    )
+
+    # Create example input with
+    # First row in 'ag_news' training dataset
+    dummy_input = {
+        "text": "Wall St. Bears Claw Back Into the Black (Reuters) Reuters - Short-sellers, Wall Street's dwindling\\band of ultra-cynics, are seeing green again.",
+        "label": 2,
+    }
+
+    # load tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
+
+    dummy_tokenized_input = tokenizer(
+        dummy_input["text"], truncation=True, return_tensors="pt"
+    )
+
+    return torch.jit.trace(model, tuple(dummy_tokenized_input.values()))
+
+
 # %%
+def convert_routine():
+    model_ckpt = "distilbert-base-uncased"
+
+    w = WandbModelArtifact(
+        entity="team_44",
+        project="model-registry",
+        artifact_name="distilbert-base-uncased-finetuned-news",
+        tag="v0",
+    )
+
+    model_dir = load_model_from_wandb(w, return_dir=True)
+
+    out = convert_model_to_torchscript(
+        model_dir=model_dir,
+        model_ckpt=model_ckpt,
+    )
+
+    out.save("model.pt")
+
+    return out
 
 
 def train_routine():
@@ -245,4 +322,5 @@ def train_routine():
 
 if __name__ == "__main__":
     # train_routine()
-    test_routine()
+    # test_routine()
+    convert_routine()
