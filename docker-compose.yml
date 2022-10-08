@@ -105,8 +105,11 @@ services:
       - jupyter-venvdata:/src/.venv
     ports:
       - "10000:8888"
-    env_file:
-      - .env
+    environment:
+      - WANDB_LOG_MODEL=true
+      - WANDB_DIR=/src/wandb
+      - WANDB_API_KEY=${WANDB_API_KEY}
+      - PROJECT_NAME=${PROJECT_NAME}
     networks:
       - rubrix
   streamlit-ui:
