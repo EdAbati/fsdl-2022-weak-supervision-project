@@ -74,7 +74,7 @@ services:
     volumes:
       - ./services/streamlit-ui/src/app:/src/app
       - ./services/streamlit-ui/src/poetry.lock:/src/poetry.lock
-      - ./services/streamlit-ui/src/pyproject.lock:/src/pyproject.lock
+      - ./services/streamlit-ui/src/pyproject.toml:/src/pyproject.toml
       - ./services/streamlit-ui/src/poetry.toml:/src/poetry.toml
       # - ./services/streamlit-ui/src/.streamlit:/root/.streamlit
     ports:

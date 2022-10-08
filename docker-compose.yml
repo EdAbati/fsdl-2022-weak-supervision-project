@@ -101,8 +101,8 @@ services:
       context: ./services/jupyter/src
     volumes:
       - ./services/jupyter/src/notebooks:/src/notebooks
-      - cachedata:/root/.cache
-      - venvdata:/src/.venv
+      - jupyter-cachedata:/root/.cache
+      - jupyter-venvdata:/src/.venv
     ports:
       - "10000:8888"
     env_file:
@@ -117,6 +117,9 @@ services:
       - .env
     networks:
       - rubrix
+    volumes:
+      - streamlit-ui-cachedata:/root/.cache
+      - streamlit-ui-venvdata:/src/.venv
   rubrix:
     image: recognai/rubrix:latest
     restart: unless-stopped
@@ -163,12 +166,14 @@ services:
 networks:
   traefik-public:
     # Allow setting it to false for testing
-    external: ${TRAEFIK_PUBLIC_NETWORK_IS_EXTERNAL-true}
+    external: ${TRAEFIK_PUBLIC_NETWORK_IS_EXTERNAL-false}
   rubrix:
     driver: bridge
 
 volumes:
   # app-db-data-test:
   elasticdata:
-  cachedata:
-  venvdata:
+  jupyter-cachedata:
+  jupyter-venvdata:
+  streamlit-ui-cachedata:
+  streamlit-ui-venvdata:

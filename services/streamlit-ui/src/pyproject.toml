@@ -10,12 +10,12 @@ fsdl-project-cli = "app.cli:hello"
 
 [tool.poetry.dependencies]
 python = "~3.10.2"
-# pydantic = "^1.8"
-# typer = "^0.5.0"
-# tenacity = "^8.0.1"
 streamlit = "^1.12.2"
 requests = "^2.28.1"
 streamlit-aggrid = "^0.3.3"
+joblib = "^1.2.0"
+torch = "^1.12.1"
+matplotlib = "^3.6.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
