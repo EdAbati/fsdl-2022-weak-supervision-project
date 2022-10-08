@@ -1,8 +1,12 @@
+import json
+import os
+
 import altair as alt
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import requests
 import streamlit as st
 from transformers import pipeline
 
@@ -13,13 +17,39 @@ LABEL_MAPPING = {
     "Sci/Tech": "Sci/Tech 📡",
 }
 
+DEFAULT_LAMBDA_URL = (
+    f"http://lambda:8080/2015-03-31/functions/function/invocations"
+)
+LAMBDA_URL = os.environ.get("LAMBDA_URL", DEFAULT_LAMBDA_URL)
+
+
+def request_to_lambda(
+    request_text: str, lambda_url: str = LAMBDA_URL
+) -> pd.DataFrame:
+    # curl -POST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"text": "A test sentence."}'
+    data = json.dumps({"text": request_text})
+    response = requests.post(lambda_url, data=data).json()
+    body = response["body"]
+
+    df_response = (
+        pd.read_json(body)
+        .reset_index()
+        .rename(
+            {
+                "index": "label",
+                "predicted_labels": "score",
+            },
+            axis=1,
+        )
+    )
+    return df_response
+
 
 def pretty_print_label(label: str):
     pretty_label = LABEL_MAPPING.get(label, "Undefined 😵‍💫")
     return pretty_label
 
 
-# @st.cache
 def get_classifier(model_id):
     return pipeline("text-classification", model=model_id)
 
@@ -67,8 +97,8 @@ def main():
     choice = st.sidebar.selectbox("Menu", menu)
     raw_text = ""
 
-    model_id = "KushalRamaiya/distilbert-base-uncased-finetuned-news"
-    classifier = get_classifier(model_id)
+    # model_id = "KushalRamaiya/distilbert-base-uncased-finetuned-news"
+    # classifier = get_classifier(model_id)
 
     if choice == "Home":
         st.subheader("Classify News from Headlines")
@@ -78,17 +108,19 @@ def main():
         if submit_text:
             col1, col2 = st.columns(2)
 
-            pred_label, pred_prob = classify_news(classifier, raw_text)
+            # pred_label, pred_prob = classify_news(classifier, raw_text)
+            pred_label: pd.DataFrame = request_to_lambda(request_text=raw_text)
+            max_label: str = pred_label.max().to_dict()["label"]
 
             with col1:
                 st.info("Original Text")
                 st.write(raw_text)
                 st.info("Prediction")
-                st.write(pretty_print_label(pred_label))
+                st.write(pretty_print_label(max_label))
 
             with col2:
                 st.info("Prediction Probability")
-                preds_df = pd.DataFrame(pred_prob)
+                preds_df = pd.DataFrame(pred_label)
                 preds_df = preprocess_preds_df(preds_df)
 
                 create_table(preds_df)
