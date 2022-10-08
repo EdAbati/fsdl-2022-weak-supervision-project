@@ -156,6 +156,12 @@ services:
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
 
+  lambda:
+    image: "${DOCKER_IMAGE_LAMBDA?Variable not set}:${TAG-latest}"
+    build:
+      context: ./services/lambda/api
+    networks:
+      - rubrix
   kibana:
     image: docker.elastic.co/kibana/kibana:7.11.1
     ports:

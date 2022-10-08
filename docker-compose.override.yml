@@ -108,6 +108,15 @@ services:
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
       - traefik.http.routers.${STACK_NAME?Variable not set}-kibana-http.rule=PathPrefix(`/kibana`)
       - traefik.http.services.${STACK_NAME?Variable not set}-kibana.loadbalancer.server.port=5601
+  lambda:
+    ports:
+      - 9000:8080
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+      - traefik.http.routers.${STACK_NAME?Variable not set}-lambda-local-http.rule=PathPrefix(`/lambda-local`)
+      - traefik.http.services.${STACK_NAME?Variable not set}-lambda-local.loadbalancer.server.port=8080
+
 networks:
   traefik-public:
     # For local dev, don't expect an external Traefik network
