@@ -111,6 +111,8 @@ services:
   lambda:
     ports:
       - 9000:8080
+    volumes:
+      - ./services/lambda/api/app.py:/var/task/app.py
     labels:
       - traefik.enable=true
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}

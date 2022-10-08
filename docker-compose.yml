@@ -158,6 +158,8 @@ services:
 
   lambda:
     image: "${DOCKER_IMAGE_LAMBDA?Variable not set}:${TAG-latest}"
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
     build:
       context: ./services/lambda/api
     networks:
