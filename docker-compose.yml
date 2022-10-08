@@ -113,17 +113,17 @@ services:
       - PROJECT_NAME=${PROJECT_NAME}
     networks:
       - rubrix
-  streamlit-ui:
+  streamlit:
     image: "${DOCKER_IMAGE_STREAMLIT_UI?Variable not set}:${TAG-latest}"
     build:
-      context: ./services/streamlit-ui/src
+      context: ./services/streamlit/src
     env_file:
       - .env
     networks:
       - rubrix
     volumes:
-      - streamlit-ui-cachedata:/root/.cache
-      - streamlit-ui-venvdata:/src/.venv
+      - streamlit-cachedata:/root/.cache
+      - streamlit-venvdata:/src/.venv
   rubrix:
     image: recognai/rubrix:latest
     restart: unless-stopped
@@ -187,5 +187,5 @@ volumes:
   elasticdata:
   jupyter-cachedata:
   jupyter-venvdata:
-  streamlit-ui-cachedata:
-  streamlit-ui-venvdata:
+  streamlit-cachedata:
+  streamlit-venvdata:
