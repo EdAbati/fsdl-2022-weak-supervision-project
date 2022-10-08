@@ -1,7 +1,7 @@
 from typing import Optional
 
 import pandas as pd
-from datasets import Dataset, load_dataset
+from datasets import ClassLabel, Dataset, Features, Value, load_dataset
 from transformers import (
     AutoConfig,
     AutoModelForSequenceClassification,
@@ -12,12 +12,49 @@ from transformers import (
 from app.config import settings
 
 
-def load_data(dataset_uri: str = "bergr7/weakly_supervised_ag_news") -> tuple:
+def load_data(dataset_name: str = "bergr7/weakly_supervised_ag_news") -> tuple:
 
-    train_dataset = load_dataset(dataset_uri, split="train")
-    val_dataset = load_dataset(dataset_uri, split="validation")
+    # files
+    labeled_data_files = {
+        "train": "train.csv",
+        "validation": "validation.csv",
+        "test": "test.csv",
+    }
+    unlabeled_data_files = {"unlabeled": "unlabeled_train.csv"}
+    # features
+    labeled_features = Features(
+        {
+            "text": Value("string"),
+            "label": ClassLabel(
+                num_classes=4,
+                names=["World", "Sports", "Business", "Sci/Tech"],
+            ),
+        }
+    )
+    unlabeled_features = Features({"text": Value("string")})
 
-    return train_dataset, val_dataset
+    # load data
+    labeled_dataset_train = load_dataset(
+        dataset_name,
+        data_files=labeled_data_files,
+        features=labeled_features,
+        split="train",
+    )
+
+    labeled_dataset_val = load_dataset(
+        dataset_name,
+        data_files=labeled_data_files,
+        features=labeled_features,
+        split="validation",
+    )
+
+    unlabeled_dataset = load_dataset(
+        dataset_name,
+        data_files=unlabeled_data_files,
+        features=unlabeled_features,
+    )
+
+    return labeled_dataset_train, labeled_dataset_val
 
 
 def get_model(
