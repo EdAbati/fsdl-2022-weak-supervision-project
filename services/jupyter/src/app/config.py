@@ -13,14 +13,7 @@ class SettingsModeEnum(str, enum.Enum):
 class Settings(BaseSettings):
 
     PROJECT_NAME: str
-    SENTRY_DSN: Optional[HttpUrl] = None
-
-    @validator("SENTRY_DSN", pre=True)
-    def sentry_dsn_can_be_blank(cls, v: str) -> Optional[str]:
-        if bool(v) is False:
-            return None
-        return v
-
+    SERVICE_MODE: SettingsModeEnum = SettingsModeEnum.PROD
     HF_TOKEN: Optional[str] = None
     WANDB_API_KEY: Optional[str] = None
 
