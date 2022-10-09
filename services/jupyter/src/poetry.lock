@@ -220,6 +220,38 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
+name = "boto3"
+version = "1.24.89"
+description = "The AWS SDK for Python"
+category = "main"
+optional = false
+python-versions = ">= 3.7"
+
+[package.dependencies]
+botocore = ">=1.27.89,<1.28.0"
+jmespath = ">=0.7.1,<2.0.0"
+s3transfer = ">=0.6.0,<0.7.0"
+
+[package.extras]
+crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
+
+[[package]]
+name = "botocore"
+version = "1.27.89"
+description = "Low-level, data-driven core of boto 3."
+category = "main"
+optional = false
+python-versions = ">= 3.7"
+
+[package.dependencies]
+jmespath = ">=0.7.1,<2.0.0"
+python-dateutil = ">=2.1,<3.0.0"
+urllib3 = ">=1.25.4,<1.27"
+
+[package.extras]
+crt = ["awscrt (==0.14.0)"]
+
+[[package]]
 name = "cachetools"
 version = "5.2.0"
 description = "Extensible memoizing collections and decorators"
@@ -688,6 +720,14 @@ MarkupSafe = ">=2.0"
 
 [package.extras]
 i18n = ["Babel (>=2.7)"]
+
+[[package]]
+name = "jmespath"
+version = "1.0.1"
+description = "JSON Matching Expressions"
+category = "main"
+optional = false
+python-versions = ">=3.7"
 
 [[package]]
 name = "joblib"
@@ -1516,6 +1556,20 @@ pygments = ">=2.6.0,<3.0.0"
 jupyter = ["ipywidgets (>=7.5.1,<8.0.0)"]
 
 [[package]]
+name = "s3transfer"
+version = "0.6.0"
+description = "An Amazon S3 Transfer Manager"
+category = "main"
+optional = false
+python-versions = ">= 3.7"
+
+[package.dependencies]
+botocore = ">=1.12.36,<2.0a.0"
+
+[package.extras]
+crt = ["botocore[crt] (>=1.20.29,<2.0a.0)"]
+
+[[package]]
 name = "scikit-learn"
 version = "1.1.2"
 description = "A set of python modules for machine learning and data mining"
@@ -1852,45 +1906,6 @@ url = "https://download.pytorch.org/whl/cu116"
 reference = "torch"
 
 [[package]]
-name = "torchaudio"
-version = "0.12.1+cu116"
-description = "An audio package for PyTorch"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-torch = "1.12.1"
-
-[package.source]
-type = "legacy"
-url = "https://download.pytorch.org/whl/cu116"
-reference = "torch"
-
-[[package]]
-name = "torchvision"
-version = "0.13.1+cu116"
-description = "image and video datasets and models for torch deep learning"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-
-[package.dependencies]
-numpy = "*"
-pillow = ">=5.3.0,<8.3.0 || >=8.4.0"
-requests = "*"
-torch = "1.12.1"
-typing-extensions = "*"
-
-[package.extras]
-scipy = ["scipy"]
-
-[package.source]
-type = "legacy"
-url = "https://download.pytorch.org/whl/cu116"
-reference = "torch"
-
-[[package]]
 name = "tornado"
 version = "6.2"
 description = "Tornado is a Python web framework and asynchronous networking library, originally developed at FriendFeed."
@@ -2173,7 +2188,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.10.2"
-content-hash = "04e5229fd387fa06678cc225f823f66e952b38aa45f27435ea56dce16ce2dabd"
+content-hash = "0c587ffb07db795e529ad17609d02a9ac1a913508188c851eb4e8c9fb493166c"
 
 [metadata.files]
 aiohttp = [
@@ -2364,6 +2379,14 @@ bleach = [
 blinker = [
     {file = "blinker-1.5-py2.py3-none-any.whl", hash = "sha256:1eb563df6fdbc39eeddc177d953203f99f097e9bf0e2b8f9f3cf18b6ca425e36"},
     {file = "blinker-1.5.tar.gz", hash = "sha256:923e5e2f69c155f2cc42dafbbd70e16e3fde24d2d4aa2ab72fbe386238892462"},
+]
+boto3 = [
+    {file = "boto3-1.24.89-py3-none-any.whl", hash = "sha256:346f8f0d101a4261dac146a959df18d024feda6431e1d9d84f94efd24d086cae"},
+    {file = "boto3-1.24.89.tar.gz", hash = "sha256:d0d8ffcdc10821c4562bc7f935cdd840033bbc342ac0e14b6bdd348b3adf4c04"},
+]
+botocore = [
+    {file = "botocore-1.27.89-py3-none-any.whl", hash = "sha256:238f1dfdb8d8d017c2aea082609a3764f3161d32745900f41bcdcf290d95a048"},
+    {file = "botocore-1.27.89.tar.gz", hash = "sha256:621f5413be8f97712b7e36c1b075a8791d1d1b9971a7ee060cdcdf5e2debf6c1"},
 ]
 cachetools = [
     {file = "cachetools-5.2.0-py3-none-any.whl", hash = "sha256:f9f17d2aec496a9aa6b76f53e3b614c965223c061982d434d160f930c698a9db"},
@@ -2702,6 +2725,10 @@ jedi = [
 Jinja2 = [
     {file = "Jinja2-3.1.2-py3-none-any.whl", hash = "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"},
     {file = "Jinja2-3.1.2.tar.gz", hash = "sha256:31351a702a408a9e7595a8fc6150fc3f43bb6bf7e319770cbc0db9df9437e852"},
+]
+jmespath = [
+    {file = "jmespath-1.0.1-py3-none-any.whl", hash = "sha256:02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980"},
+    {file = "jmespath-1.0.1.tar.gz", hash = "sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe"},
 ]
 joblib = [
     {file = "joblib-1.2.0-py3-none-any.whl", hash = "sha256:091138ed78f800342968c523bdde947e7a305b8594b910a0fea2ab83c3c6d385"},
@@ -3623,6 +3650,10 @@ rich = [
     {file = "rich-12.5.1-py3-none-any.whl", hash = "sha256:2eb4e6894cde1e017976d2975ac210ef515d7548bc595ba20e195fb9628acdeb"},
     {file = "rich-12.5.1.tar.gz", hash = "sha256:63a5c5ce3673d3d5fbbf23cd87e11ab84b6b451436f1b7f19ec54b6bc36ed7ca"},
 ]
+s3transfer = [
+    {file = "s3transfer-0.6.0-py3-none-any.whl", hash = "sha256:06176b74f3a15f61f1b4f25a1fc29a4429040b7647133a463da8fa5bd28d5ecd"},
+    {file = "s3transfer-0.6.0.tar.gz", hash = "sha256:2ed07d3866f523cc561bf4a00fc5535827981b117dd7876f036b0c1aca42c947"},
+]
 scikit-learn = [
     {file = "scikit-learn-1.1.2.tar.gz", hash = "sha256:7c22d1305b16f08d57751a4ea36071e2215efb4c09cb79183faa4e8e82a3dbf8"},
     {file = "scikit_learn-1.1.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:6c840f662b5d3377c4ccb8be1fc21bb52cb5d8b8790f8d6bf021739f84e543cf"},
@@ -3854,26 +3885,6 @@ torch = [
     {file = "torch-1.12.1+cu116-cp38-cp38-win_amd64.whl", hash = "sha256:b8e8906e770bcad12e67c269e1bcdd7661a8abd96519a4ba643e86440bbcc1bf"},
     {file = "torch-1.12.1+cu116-cp39-cp39-linux_x86_64.whl", hash = "sha256:7725420dabebfcaf44984edce3283eea91f98f0f7d5874bc68c7a164bd8126e3"},
     {file = "torch-1.12.1+cu116-cp39-cp39-win_amd64.whl", hash = "sha256:84f031e4ee25d95368d7531aa58e79da9808d3fa53b4b363ea03a2450b6fd0af"},
-]
-torchaudio = [
-    {file = "torchaudio-0.12.1+cu116-cp310-cp310-linux_x86_64.whl", hash = "sha256:29d781546050d654315f10901b05f5ec4d62a6d322b3445f7b1fbea382665688"},
-    {file = "torchaudio-0.12.1+cu116-cp310-cp310-win_amd64.whl", hash = "sha256:6e8933ac7e3acaccf104e882a08fa333f2fc40070bd3ac9cce7e3d0cd3d55465"},
-    {file = "torchaudio-0.12.1+cu116-cp37-cp37m-linux_x86_64.whl", hash = "sha256:f19ef695ace19d5d9906d9efa5d9b9647862c84ff01f012943d5336688bffe6c"},
-    {file = "torchaudio-0.12.1+cu116-cp37-cp37m-win_amd64.whl", hash = "sha256:cd4af10e45aa20abef415ab1f81565bcbe2565fd9eac14d77119a44be1e27af9"},
-    {file = "torchaudio-0.12.1+cu116-cp38-cp38-linux_x86_64.whl", hash = "sha256:082b59e9e521b3fea46a85341f00c368ae094d214a915245f8e300bb7ebc667a"},
-    {file = "torchaudio-0.12.1+cu116-cp38-cp38-win_amd64.whl", hash = "sha256:b1201fe58e9d5d0ef9111dc10678e9444e37160feae6bcfcd54d2791a2c302d0"},
-    {file = "torchaudio-0.12.1+cu116-cp39-cp39-linux_x86_64.whl", hash = "sha256:a4d6b97d5f6f0b57177832e11d30ac70eed13b696cb765669b42bb37320daa0c"},
-    {file = "torchaudio-0.12.1+cu116-cp39-cp39-win_amd64.whl", hash = "sha256:bebf9d071636f7d76d7150e135dab4802d1816ada77018b0813607bdb09fa50e"},
-]
-torchvision = [
-    {file = "torchvision-0.13.1+cu116-cp310-cp310-linux_x86_64.whl", hash = "sha256:0c9a2b605ac30fcf475d60f79ba378af0073a22de585453f8c3dd6c1452ab9bc"},
-    {file = "torchvision-0.13.1+cu116-cp310-cp310-win_amd64.whl", hash = "sha256:ba8b7d3c33f63feb29c7dd8c0db68b735d0c9d924ff4e84121b4b20b17cec7a5"},
-    {file = "torchvision-0.13.1+cu116-cp37-cp37m-linux_x86_64.whl", hash = "sha256:dcf32f6d998493e76ec21a38bbb856b7402295cf7a67fb09ce5bde7e7e725756"},
-    {file = "torchvision-0.13.1+cu116-cp37-cp37m-win_amd64.whl", hash = "sha256:9ec5654c56a22fe420dc0af0ff5cd31105f583fdb0240043ff26a7cfed7e05fb"},
-    {file = "torchvision-0.13.1+cu116-cp38-cp38-linux_x86_64.whl", hash = "sha256:c3ceb2b3f456f0c984af71ef55f8637f178a29dc3e13a66fbb010ceead2891e1"},
-    {file = "torchvision-0.13.1+cu116-cp38-cp38-win_amd64.whl", hash = "sha256:8a4c395bb72cf51eb4318c6861c9a5ea490d48ec36a3d767220ef182445449cb"},
-    {file = "torchvision-0.13.1+cu116-cp39-cp39-linux_x86_64.whl", hash = "sha256:75986abe572138258eb9795cb4cd73f40b2bdf8374fefa1af6ff6bb0dbc972c6"},
-    {file = "torchvision-0.13.1+cu116-cp39-cp39-win_amd64.whl", hash = "sha256:92e4685c6010b6b1c228ebb5fe93105d0a71e5b586483a942e04529a43e0bb42"},
 ]
 tornado = [
     {file = "tornado-6.2-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:20f638fd8cc85f3cbae3c732326e96addff0a15e22d80f049e00121651e82e72"},

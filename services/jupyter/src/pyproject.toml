@@ -25,6 +25,7 @@ torch = {version = "^1.10.2", source = "torch"}
 transformers = "^4.22.2"
 typer = "^0.6.1"
 wandb = "^0.13.3"
+boto3 = {version = "^1.24.89", source = "pypi"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
