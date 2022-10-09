@@ -1,9 +1,7 @@
 import enum
-import os
-import secrets
 from typing import Optional
 
-from pydantic import AnyHttpUrl, BaseSettings, HttpUrl, validator
+from pydantic import BaseSettings, HttpUrl, validator
 
 
 class SettingsModeEnum(str, enum.Enum):
