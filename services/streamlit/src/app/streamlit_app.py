@@ -14,14 +14,16 @@ LABEL_MAPPING = {
     "Sci/Tech": "Sci/Tech 📡",
 }
 
+
 DEFAULT_LAMBDA_URL = (
-    f"http://lambda:8080/2015-03-31/functions/function/invocations"
+    "http://lambda:8080/2015-03-31/functions/function/invocations"
 )
 LAMBDA_URL = os.environ.get("LAMBDA_URL", DEFAULT_LAMBDA_URL)
 
 
 def request_to_lambda(
-    request_text: str, lambda_url: str = LAMBDA_URL
+    request_text: str,
+    lambda_url: str = LAMBDA_URL,
 ) -> pd.DataFrame:
     data = json.dumps({"text": request_text})
     response = requests.post(lambda_url, data=data).json()
@@ -44,21 +46,6 @@ def request_to_lambda(
 def pretty_print_label(label: str):
     pretty_label = LABEL_MAPPING.get(label, "Undefined 😵‍💫")
     return pretty_label
-
-
-def get_classifier(model_id):
-    return pipeline("text-classification", model=model_id)
-
-
-def classify_news(classifier, text):
-    preds = classifier(text, return_all_scores=False)
-    label = {0: "World", 1: "Sports", 2: "Business", 3: "Sci/Tech"}
-    text_label = label.get(int(preds[0]["label"][-1]))
-    preds = classifier(text, return_all_scores=True)
-    for items in preds[0]:
-        items["label"] = label.get(int(items["label"][-1]))
-
-    return text_label, preds[0]
 
 
 def preprocess_preds_df(preds_df: pd.DataFrame) -> pd.DataFrame:
@@ -122,7 +109,6 @@ def main():
         st.subheader("Logs")
     if choice == "About":
         st.subheader("About")
-    pass
 
 
 if __name__ == "__main__":
