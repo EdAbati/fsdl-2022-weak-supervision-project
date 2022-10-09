@@ -19,7 +19,7 @@ def train(
 
     from app.model.train_model import train_routine
 
-    train_routine(model_ckpt=wandb_name, epoch=epochs, batch_size=batch_size)
+    train_routine(model_ckpt=wandb_name, epochs=epochs, batch_size=batch_size)
 
 
 @app.command()
