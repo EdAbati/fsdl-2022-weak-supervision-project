@@ -67,48 +67,27 @@ services:
         # Middleware to redirect www, and redirect HTTP to HTTPS
         # to disable www redirection remove the section: ${STACK_NAME?Variable not set}-www-redirect,
         - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-http.middlewares=${STACK_NAME?Variable not set}-www-redirect,${STACK_NAME?Variable not set}-https-redirect
-  # db_test:
 
-
-  # db:
-  #   image: postgres:14
-  #   volumes:
-  #     - app-db-data:/var/lib/postgresql/data/pgdata
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - PGDATA=/var/lib/postgresql/data/pgdata
-  #   deploy:
-  #     placement:
-  #       constraints:
-  #         - node.labels.${STACK_NAME?Variable not set}.app-db-data == true
-
-  restapi:
-    image: "${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}"
-    # depends_on:
-    #   - db
-    env_file:
-      - .env
-    environment:
-      - SERVER_NAME=${DOMAIN?Variable not set}
-      - SERVER_HOST=https://${DOMAIN?Variable not set}
-      # Allow explicit env var override for tests
-      # - SMTP_HOST=${SMTP_HOST}
+  lambda-base:
+    image: "${DOCKER_IMAGE_LAMBDA?Variable not set}-pre:${TAG-latest}"
     build:
-      context: ./services/restapi/src
-      dockerfile: Dockerfile
+      context: ./services/lambda/api
+      target: base
       args:
-        BACKEND_APP_MODULE: ${BACKEND_APP_MODULE-app.main:app}
-        BACKEND_PRE_START_PATH: ${BACKEND_PRE_START_PATH-/app/prestart.sh}
-        BACKEND_PROCESS_MANAGER: ${BACKEND_PROCESS_MANAGER-gunicorn}
-        BACKEND_WITH_RELOAD: ${BACKEND_WITH_RELOAD-false}
-        INSTALL_DEV: ${INSTALL_DEV-false}
-    deploy:
-      labels:
-        - traefik.enable=true
-        - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-        - traefik.http.routers.${STACK_NAME?Variable not set}-restapi-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/webapp`)
-        - traefik.http.services.${STACK_NAME?Variable not set}-restapi.loadbalancer.server.port=80
+        - AWS_REGION=${AWS_REGION}
+        - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+        - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - rubrix
+  lambda:
+    image: "${DOCKER_IMAGE_LAMBDA?Variable not set}-api:${TAG-latest}"
+    build:
+      context: ./services/lambda/api
+      target: api
+      args:
+        - AWS_REGION=${AWS_REGION}
+        - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+        - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     networks:
       - rubrix
 
@@ -175,7 +154,7 @@ services:
 networks:
   traefik-public:
     # Allow setting it to false for testing
-    external: ${TRAEFIK_PUBLIC_NETWORK_IS_EXTERNAL-true}
+    external: ${TRAEFIK_PUBLIC_NETWORK_IS_EXTERNAL-false}
   rubrix:
     driver: bridge
 
