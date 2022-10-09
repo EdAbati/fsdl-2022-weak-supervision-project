@@ -1,11 +1,11 @@
 # Model API with AWS Lambda
 
-This folder contains the code and supporting files needed to create a serveless model API.
+This folder contains the code and supporting files needed to create a serverless model API.
 It includes the following files and folders:
 
-- `app/app.py` - Code for the application's Lambda function.
-- `app/Dockerfile` - The Dockerfile to build the container image for local testing.
-- `app/requirements.txt` - The pip requirements installed in the test container.
+- `api/app.py` - Code for the application's Lambda function.
+- `api/Dockerfile` - The Dockerfile to build the container image for local testing.
+- `api/requirements.txt` - The pip requirements installed in the test container.
 
 ## Create API locally in a Docker container
 
