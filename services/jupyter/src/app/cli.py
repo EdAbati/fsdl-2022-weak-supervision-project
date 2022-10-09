@@ -9,18 +9,17 @@ app = typer.Typer()
 
 @app.command()
 def train(
-    p1: float = typer.Argument(..., help="hidden dropout probability"),
-    p2: Optional[float] = typer.Argument(
-        None, help="hidden dropout probability"
-    ),
     wandb_name: str = typer.Argument(
-        ..., help="Name for Weights and Biases Logging"
+        "distilbert-base-uncased", help="Name for Weights and Biases Logging"
     ),
-    num_layers: int = typer.Argument(
-        ..., help="number of layers in the model"
-    ),
+    epochs: int = typer.Argument(1, help="number of epochs"),
+    batch_size: int = typer.Argument(64, help="batch size"),
 ):
-    pass
+    """Trains a model and pushes an artifact to weights and biases"""
+
+    from app.model.train_model import train_routine
+
+    train_routine(model_ckpt=wandb_name, epoch=epochs, batch_size=batch_size)
 
 
 @app.command()

@@ -301,26 +301,24 @@ def convert_routine():
     return out
 
 
-def train_routine():
-
-    model_ckpt = "distilbert-base-uncased"
+def train_routine(
+    model_ckpt: str = "distilbert-base-uncased",
+    epochs: int = 1,
+    batch_size: int = 64,
+):
 
     model = get_model(
-        # hidden_dp=0.1,
-        # n_layers=4,
         model_ckpt=model_ckpt,
     )
 
-    trainer = train_model(
+    train_model(
         model,
         wandb_name=model_ckpt + "_test",
         model_ckpt=model_ckpt,
-        epochs=1,
-        batch_size=64,
+        epochs=epochs,
+        batch_size=batch_size,
     )
 
 
 if __name__ == "__main__":
-    # train_routine()
-    # test_routine()
-    convert_routine()
+    train_routine()
