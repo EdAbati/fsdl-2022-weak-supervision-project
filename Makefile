@@ -35,6 +35,12 @@ down: ## stop docker-compose
 ps: ## get info about running containers
 	@docker compose ps
 
+jupyter.model.train.default: ## train model inside the jupyter container with default arguments.
+	@docker compose exec -it jupyter fsdl-project-cli train
+
+jupyter.model.train.help: ## Get help for training model inside the jupyter container.
+	@docker compose exec -it jupyter fsdl-project-cli train --help
+
 dev.all.up: ## start docker-compose in dev mode
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
 

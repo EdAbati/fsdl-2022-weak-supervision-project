@@ -46,6 +46,6 @@ EXPOSE 8888
 COPY notebooks /src/notebooks
 
 # install scripts from CLI, see https://github.com/python-poetry/poetry/issues/3984#issuecomment-863230690
-RUN poetry install --no-dev --no-interaction --no-root
+RUN poetry install --no-dev --no-interaction
 
 CMD ["jupyter-lab", "--allow-root", "--ip", "0.0.0.0", "--port", "8888", "--notebook-dir=/src/"]
