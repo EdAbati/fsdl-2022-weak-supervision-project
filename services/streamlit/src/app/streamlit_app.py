@@ -2,9 +2,6 @@ import json
 import os
 
 import altair as alt
-import joblib
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import requests
 import streamlit as st
@@ -26,7 +23,6 @@ LAMBDA_URL = os.environ.get("LAMBDA_URL", DEFAULT_LAMBDA_URL)
 def request_to_lambda(
     request_text: str, lambda_url: str = LAMBDA_URL
 ) -> pd.DataFrame:
-    # curl -POST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"text": "A test sentence."}'
     data = json.dumps({"text": request_text})
     response = requests.post(lambda_url, data=data).json()
     body = response["body"]
@@ -97,9 +93,6 @@ def main():
     choice = st.sidebar.selectbox("Menu", menu)
     raw_text = ""
 
-    # model_id = "KushalRamaiya/distilbert-base-uncased-finetuned-news"
-    # classifier = get_classifier(model_id)
-
     if choice == "Home":
         st.subheader("Classify News from Headlines")
         with st.form(key="news_clf_form"):
@@ -108,7 +101,6 @@ def main():
         if submit_text:
             col1, col2 = st.columns(2)
 
-            # pred_label, pred_prob = classify_news(classifier, raw_text)
             pred_label: pd.DataFrame = request_to_lambda(request_text=raw_text)
             max_label: str = pred_label.max().to_dict()["label"]
 
@@ -128,19 +120,6 @@ def main():
 
     if choice == "Saved Logs":
         st.subheader("Logs")
-        # data = pd.DataFrame(columns=["Text","Probability"])
-        # st.text("Logs")
-        # df_log_process = st.dataframe(data)
-
-        # if submit_text:
-        #     data = data.append(
-        #         {
-        #             'Text':raw_text,
-        #             'Probability':"something",
-        #         }, ignore_index=True)
-
-        #     df_log_process = df_log_process.dataframe(data)
-
     if choice == "About":
         st.subheader("About")
     pass
