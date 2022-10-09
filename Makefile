@@ -35,9 +35,6 @@ down: ## stop docker-compose
 ps: ## get info about running containers
 	@docker compose ps
 
-restapi.test: ## run pytest in the restapi
-	@docker compose exec restapi pytest
-
 dev.all.up: ## start docker-compose in dev mode
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
 
