@@ -122,6 +122,8 @@ services:
       context: ./services/streamlit/src
     env_file:
       - .env
+    environment:
+      - LAMBDA_URL=${LAMBDA_URL-http://lambda:8080/2015-03-31/functions/function/invocations}
     networks:
       - rubrix
     volumes:
