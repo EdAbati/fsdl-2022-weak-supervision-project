@@ -5,6 +5,8 @@ channels:
 dependencies:
   - python=3.8
   - pip
+  - notebook
+  - ipykernel
   - pip:
     - notebook
     - pre-commit
@@ -13,3 +15,4 @@ dependencies:
     - numpy==1.23
     - wandb
     - typer[all]
+    - black

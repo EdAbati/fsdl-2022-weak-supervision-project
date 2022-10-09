@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 import torch
 import typer
@@ -14,18 +15,40 @@ DEFAULT_TRACED_MODEL_PATH = LOCAL_MODELS_PATH / "traced_model.pt"
 
 # Model Constants
 DEFAULT_PRETRAINED_MODEL_NAME = "distilbert-base-uncased"
+DEFAULT_WANDB_MODEL_REGISTRY__ARTIFACT_NAME = "team_44/model-registry/distilbert-base-uncased-finetuned-news"
+DEFAULT_WANDB_MODEL_REGISTRY__ARTIFACT_ALIAS = "prod"
+
 NUM_LABELS = 4
 
 app = typer.Typer()
 
+TYPER_ARTIFACT_NAME_HELP = (
+    "The name of the W&B model artifact to be used in the format [entity]/[project]/[artifact_name]:[alias]"
+)
+TYPER_MODEL_NAME_HELP = "The name of the W&B model in the registry in the format [entity]/[project]/[model_name]"
+TYPER_MODEL_ALIAS_HELP = "Alias of the model to be used in the W&B model registry. You can pass this option multiple times to register multiple aliases."
+
 
 @app.command()
-def register_artifact(artifact_name: str, model_name: str, model_alias: str = "prod") -> wandb.Artifact:
-    """Register WandB artifact in the Model Registry"""
+def register_artifact(
+    artifact_name: str = typer.Option(
+        ...,
+        help=TYPER_ARTIFACT_NAME_HELP,
+    ),
+    model_name: str = typer.Option(
+        DEFAULT_WANDB_MODEL_REGISTRY__ARTIFACT_NAME,
+        help=TYPER_MODEL_NAME_HELP,
+    ),
+    model_alias: List[str] = typer.Option(
+        [DEFAULT_WANDB_MODEL_REGISTRY__ARTIFACT_ALIAS],
+        help=TYPER_MODEL_ALIAS_HELP,
+    ),
+) -> wandb.Artifact:
+    """Registers a WandB artifact from a run in the Model Registry"""
     api = wandb.Api()
     artifact = api.artifact(artifact_name)
     try:
-        is_linked = artifact.link(target_path=model_name, aliases=[model_alias])
+        is_linked = artifact.link(target_path=model_name, aliases=[*model_alias])
     except wandb.errors.CommError as comm_error:
         if str(comm_error) == "Permission denied, ask the project owner to grant you access":
             raise ValueError(
@@ -42,7 +65,8 @@ def register_artifact(artifact_name: str, model_name: str, model_alias: str = "p
 
 
 def convert_model_to_torchscript(model_dir: str) -> torch.jit.ScriptModule:
-    """Convert a saved model into TorchScript using tracing."""
+    """Converts a saved model into TorchScript using tracing."""
+
     print(f"Loading model from path '{model_dir}'...")
     model = AutoModelForSequenceClassification.from_pretrained(model_dir, num_labels=NUM_LABELS, torchscript=True)
     # First row in 'ag_news' training dataset
@@ -60,12 +84,16 @@ def convert_model_to_torchscript(model_dir: str) -> torch.jit.ScriptModule:
 def register_and_convert_model(
     artifact_name: str = typer.Option(
         ...,
-        help="The name of the W&B model artifact to be used in the format [entity]/[project]/[artifact_name]:[alias]",
+        help=TYPER_ARTIFACT_NAME_HELP,
     ),
     model_name: str = typer.Option(
-        ..., help="The name of the W&B model in the registry in the format [entity]/[project]/[model_name]"
+        DEFAULT_WANDB_MODEL_REGISTRY__ARTIFACT_NAME,
+        help=TYPER_MODEL_NAME_HELP,
     ),
-    model_alias: str = typer.Option(default="prod", help="A new alias to attach to the model."),
+    model_alias: List[str] = typer.Option(
+        default=[DEFAULT_WANDB_MODEL_REGISTRY__ARTIFACT_ALIAS],
+        help=TYPER_MODEL_ALIAS_HELP,
+    ),
 ):
     """Register a model in the Model Registry, convert it to TorchScript and store it locally."""
     model_artifact = register_artifact(artifact_name, model_name, model_alias)
