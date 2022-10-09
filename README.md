@@ -20,7 +20,7 @@ Authors:
     - [AWS CLI](https://aws.amazon.com/cli/) installed and configured
 
 ### Setup project
-Create a virtual enviroment using conda: `make conda-env-and-update`
+Create a virtual environment using conda: `make conda-env-and-update`
 
 ## Usage
 
@@ -33,6 +33,8 @@ Create a virtual enviroment using conda: `make conda-env-and-update`
     ```
 
 This will register the model artifact in the registry and it will convert it in the TorchScript format.
+
+### Start API
 
 
 ## Contributing
