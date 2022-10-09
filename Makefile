@@ -13,7 +13,7 @@ help: ## Print this help
 
 .PHONY: conda-env-and-update
 conda-env-and-update: ## create and update a virtual environment using conda
-	conda env update --prune -f environment.yml
+	conda env update --prune -f conda-environment.yml
 	@echo "!!! PLEASE ACTIVATE CONDA ENVIRONMENT !!!"
 
 .PHONY: install-pre-commit
