@@ -86,6 +86,7 @@ services:
       - AWS_REGION=${AWS_REGION}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - RUBRIX_API_URL=${RUBRIX_API_URL-http://rubrix:80}
 
     networks:
       - rubrix
