@@ -62,11 +62,6 @@ def load_data(dataset_name: str = "bergr7/weakly_supervised_ag_news") -> tuple:
         split="test",
     )
 
-    unlabeled_dataset = load_dataset(
-        dataset_name,
-        data_files=unlabeled_data_files,
-        features=unlabeled_features,
-    )
 
     return labeled_dataset_train, labeled_dataset_val, labeled_dataset_test
 
