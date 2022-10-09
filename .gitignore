@@ -130,3 +130,7 @@ dmypy.json
 
 # vscode settings
 .vscode/
+
+# Models folder is part of the repo, but the artifacts will be ignored.
+models/*
+!models/README.md
