@@ -33,29 +33,6 @@ services:
       # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.middlewares=${STACK_NAME?Variable not set}-traefik-dashboard-auth
       # - traefik.http.middlewares.${STACK_NAME?Variable not set}-traefik-dashboard-auth.basicauth.users=user:$$2y$$05$$903CSuS1Cd8qfunjKpLXoO3szTEa2RuVj9MA73EfxeoGjeeuGXHsm
 
-  restapi:
-    ports:
-      - "8888:80"
-    volumes:
-      - ./services/restapi/src/myapp:/app/myapp
-    environment:
-      - SERVER_HOST=http://${DOMAIN?Variable not set}
-      - FASTAPI_DEBUG=true
-    build:
-      context: ./services/restapi/src
-      dockerfile: Dockerfile
-      args:
-        BACKEND_APP_MODULE: ${BACKEND_APP_MODULE-app.main:app}
-        BACKEND_PRE_START_PATH: ${BACKEND_PRE_START_PATH-/app/prestart.sh}
-        BACKEND_PROCESS_MANAGER: ${BACKEND_PROCESS_MANAGER-uvicorn}
-        BACKEND_WITH_RELOAD: ${BACKEND_WITH_RELOAD-true}
-        INSTALL_DEV: ${INSTALL_DEV-true}
-    labels:
-      - traefik.enable=true
-      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-      - traefik.http.routers.${STACK_NAME?Variable not set}-restapi-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)
-      - traefik.http.services.${STACK_NAME?Variable not set}-restapi.loadbalancer.server.port=80
-
   jupyter:
     volumes:
       - ./services/jupyter/src/notebooks:/src/notebooks
