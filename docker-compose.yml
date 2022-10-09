@@ -102,7 +102,6 @@ services:
     volumes:
       - ./services/jupyter/src/notebooks:/src/notebooks
       - jupyter-cachedata:/root/.cache
-      - jupyter-venvdata:/src/.venv
     ports:
       - "10000:8888"
     environment:
@@ -127,7 +126,6 @@ services:
       - rubrix
     volumes:
       - streamlit-cachedata:/root/.cache
-      - streamlit-venvdata:/src/.venv
   rubrix:
     image: recognai/rubrix:latest
     restart: unless-stopped
@@ -190,6 +188,4 @@ volumes:
   # app-db-data-test:
   elasticdata:
   jupyter-cachedata:
-  jupyter-venvdata:
   streamlit-cachedata:
-  streamlit-venvdata:
