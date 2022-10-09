@@ -3,7 +3,15 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - python=3.7  # versioned to match Google Colab
-  - pip=21.1  # versioned to match Google Colab
+  - python=3.8
+  - pip
+  - notebook
+  - ipykernel
   - pip:
     - pre-commit
+    - transformers[torch]==4.22
+    - datasets==2.5
+    - numpy==1.23
+    - wandb
+    - typer[all]
+    - black
