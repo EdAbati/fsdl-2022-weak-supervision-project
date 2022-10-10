@@ -2001,6 +2001,26 @@ docs = ["Sphinx", "numpydoc", "sphinx-rtd-theme"]
 testing = ["pytest", "pytest-cov"]
 
 [[package]]
+name = "small-text"
+version = "1.1.0"
+description = "Active Learning for Text Classifcation in Python."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+dill = "*"
+numpy = ">=1.20.0"
+packaging = "*"
+scikit-learn = ">=0.24.1"
+scipy = "*"
+tqdm = "*"
+
+[package.extras]
+pytorch = ["torch (>=1.6.0)", "torchtext (>=0.7.0)"]
+transformers = ["torch (>=1.6.0)", "torchtext (>=0.7.0)", "transformers (>=4.0.0)"]
+
+[[package]]
 name = "smmap"
 version = "5.0.0"
 description = "A pure Python implementation of a sliding window memory map manager"
@@ -2574,7 +2594,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.10.2"
-content-hash = "2e5d29ce36a040af5692ef367e6309aa630960fd5a39a80dc22fa5c716e742cf"
+content-hash = "4ca8e0ff9f249f02b877d6dbeec7f644516faed1e81945b117018f93cb57bc56"
 
 [metadata.files]
 absl-py = [
@@ -4327,6 +4347,10 @@ skorch = [
     {file = "skorch-0.12.0-py3-none-any.whl", hash = "sha256:fd41a93eaffe8f26695a74eb404af86e179aaf15cdeea1af2ee3eb0bc2f7a98d"},
     {file = "skorch-0.12.0-py3.9.egg", hash = "sha256:152560a0a9eecde87cb0f21b4547a091e381c2a71f34dec22a9fa19ceeb186a5"},
     {file = "skorch-0.12.0.tar.gz", hash = "sha256:2d132ceca9a2345ddfde3a8bb17ebc39ab3c7da8c1244fd7928f47828876e2f5"},
+]
+small-text = [
+    {file = "small-text-1.1.0.tar.gz", hash = "sha256:74616052a6366335d8bd61a66028658a09f17aeb18c19f8576545e570331e737"},
+    {file = "small_text-1.1.0-py3-none-any.whl", hash = "sha256:d43890207063d23adec94eb6f28632b2725b68b7328bf8ad2ed23c88a234f4c0"},
 ]
 smmap = [
     {file = "smmap-5.0.0-py3-none-any.whl", hash = "sha256:2aba19d6a040e78d8b09de5c57e96207b09ed71d8e55ce0959eeee6c8e190d94"},
