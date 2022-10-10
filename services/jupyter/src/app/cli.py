@@ -1,5 +1,4 @@
 import typer
-
 from app.config import settings
 
 app = typer.Typer()

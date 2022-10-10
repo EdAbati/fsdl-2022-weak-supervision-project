@@ -3,6 +3,7 @@ from typing import Any, Optional
 import boto3
 import torch
 import wandb
+from app.config import settings
 from datasets import ClassLabel, Features, Value, load_dataset
 from pydantic import BaseModel
 from sklearn.metrics import accuracy_score, f1_score
@@ -12,8 +13,6 @@ from transformers import (
     Trainer,
     TrainingArguments,
 )
-
-from app.config import settings
 
 NUM_LABELS = 4
 

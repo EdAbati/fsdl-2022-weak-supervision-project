@@ -8,6 +8,7 @@ dependencies:
   - notebook
   - ipykernel
   - pip:
+    - notebook
     - pre-commit
     - transformers[torch]==4.22
     - datasets==2.5

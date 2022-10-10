@@ -68,6 +68,29 @@ services:
         # to disable www redirection remove the section: ${STACK_NAME?Variable not set}-www-redirect,
         - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-http.middlewares=${STACK_NAME?Variable not set}-www-redirect,${STACK_NAME?Variable not set}-https-redirect
 
+  lambda-base:
+    image: "${DOCKER_IMAGE_LAMBDA?Variable not set}-pre:${TAG-latest}"
+    build:
+      context: ./services/lambda/api
+      target: base
+      args:
+        - AWS_REGION=${AWS_REGION}
+        - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+        - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - rubrix
+  lambda:
+    image: "${DOCKER_IMAGE_LAMBDA?Variable not set}-api:${TAG-latest}"
+    build:
+      context: ./services/lambda/api
+      target: api
+      args:
+        - AWS_REGION=${AWS_REGION}
+        - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+        - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - rubrix
+
   jupyter:
     image: "${DOCKER_IMAGE_JUPYTER?Variable not set}:${TAG-latest}"
     build:
@@ -138,15 +161,6 @@ services:
       - rubrix
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
-
-  lambda:
-    image: "${DOCKER_IMAGE_LAMBDA?Variable not set}:${TAG-latest}"
-    environment:
-      - WANDB_API_KEY=${WANDB_API_KEY}
-    build:
-      context: ./services/lambda/api
-    networks:
-      - rubrix
   kibana:
     env_file: .env
     container_name: ${USER_NAME-test}-kibana
