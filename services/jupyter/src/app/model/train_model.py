@@ -18,7 +18,10 @@ from app.config import settings
 NUM_LABELS = 4
 
 
-def load_data(dataset_name: str = "bergr7/weakly_supervised_ag_news") -> tuple:
+def load_data(
+    dataset_name: str = "bergr7/weakly_supervised_ag_news",
+    split: bool = True,
+) -> tuple:
 
     # files
     labeled_data_files = {
@@ -40,34 +43,42 @@ def load_data(dataset_name: str = "bergr7/weakly_supervised_ag_news") -> tuple:
     )
     unlabeled_features = Features({"text": Value("string")})
 
-    # load data
-    labeled_dataset_train = load_dataset(
+    if split:
+        # load data
+        labeled_dataset_train = load_dataset(
+            dataset_name,
+            data_files=labeled_data_files,
+            features=labeled_features,
+            split="train",
+        )
+
+        labeled_dataset_val = load_dataset(
+            dataset_name,
+            data_files=labeled_data_files,
+            features=labeled_features,
+            split="validation",
+        )
+
+        labeled_dataset_test = load_dataset(
+            dataset_name,
+            data_files=labeled_data_files,
+            features=labeled_features,
+            split="test",
+        )
+
+        return labeled_dataset_train, labeled_dataset_val, labeled_dataset_test
+
+    return load_dataset(
         dataset_name,
         data_files=labeled_data_files,
         features=labeled_features,
-        split="train",
     )
-
-    labeled_dataset_val = load_dataset(
-        dataset_name,
-        data_files=labeled_data_files,
-        features=labeled_features,
-        split="validation",
-    )
-
-    labeled_dataset_test = load_dataset(
-        dataset_name,
-        data_files=labeled_data_files,
-        features=labeled_features,
-        split="test",
-    )
-
-    return labeled_dataset_train, labeled_dataset_val, labeled_dataset_test
 
 
 def get_model(model_ckpt: str):
     model = AutoModelForSequenceClassification.from_pretrained(
-        model_ckpt, num_labels=NUM_LABELS
+        model_ckpt,
+        num_labels=NUM_LABELS,
     )
     return model
 
@@ -177,7 +188,8 @@ def upload_to_s3_bucket(
 
 
 def load_model_from_wandb(
-    artifact_params: WandbModelArtifact, return_dir: bool = False
+    artifact_params: WandbModelArtifact,
+    return_dir: bool = False,
 ):
 
     run = wandb.init()
@@ -224,12 +236,15 @@ def test_routine(model: Optional[Any] = None):
 
 
 def convert_model_to_torchscript(
-    model_dir: str, model_ckpt: str
+    model_dir: str,
+    model_ckpt: str,
 ) -> torch.jit.ScriptModule:
     """Convert a saved model into TorchScript using tracing."""
 
     model = AutoModelForSequenceClassification.from_pretrained(
-        model_dir, num_labels=NUM_LABELS, torchscript=True
+        model_dir,
+        num_labels=NUM_LABELS,
+        torchscript=True,
     )
 
     # Create example input with
@@ -243,7 +258,9 @@ def convert_model_to_torchscript(
     tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
 
     dummy_tokenized_input = tokenizer(
-        dummy_input["text"], truncation=True, return_tensors="pt"
+        dummy_input["text"],
+        truncation=True,
+        return_tensors="pt",
     )
 
     return torch.jit.trace(model, tuple(dummy_tokenized_input.values()))
