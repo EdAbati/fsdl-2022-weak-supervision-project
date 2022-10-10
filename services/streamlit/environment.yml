@@ -1,0 +1,10 @@
+name: weak-active-learner-streamlit
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - psutil
+  - pip:
+    - pip-tools

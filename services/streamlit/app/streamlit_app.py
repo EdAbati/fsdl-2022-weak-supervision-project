@@ -5,7 +5,6 @@ import altair as alt
 import pandas as pd
 import requests
 import streamlit as st
-from transformers import pipeline
 
 LABEL_MAPPING = {
     "World": "World 🌎",
@@ -25,6 +24,7 @@ def request_to_lambda(
     request_text: str,
     lambda_url: str = LAMBDA_URL,
 ) -> pd.DataFrame:
+
     data = json.dumps({"text": request_text})
     response = requests.post(lambda_url, data=data).json()
     body = response["body"]
@@ -43,7 +43,7 @@ def request_to_lambda(
     return df_response
 
 
-def pretty_print_label(label: str):
+def pretty_print_label(label: str) -> str:
     pretty_label = LABEL_MAPPING.get(label, "Undefined 😵‍💫")
     return pretty_label
 
@@ -51,64 +51,59 @@ def pretty_print_label(label: str):
 def preprocess_preds_df(preds_df: pd.DataFrame) -> pd.DataFrame:
     preds_df["label"] = preds_df["label"].apply(pretty_print_label)
     preds_df["prob"] = preds_df["score"].apply(lambda x: f"{100 * x:.2f}%")
-    return preds_df
+    return preds_df.sort_values(by="score", ascending=False)
 
 
 def create_table(preds_df: pd.DataFrame):
-    st.write(preds_df)
+    st.table(preds_df)
 
 
-def create_chart(raw_text: str, preds_df: pd.DataFrame):
-
+def create_chart(preds_df: pd.DataFrame):
     c = (
         alt.Chart(preds_df)
         .mark_bar()
         .encode(
-            x="label:O",
+            x=alt.X("label:O", sort="-y"),
             y="score:Q",
             color="score:Q",
             tooltip=["label", "score"],
         )
     )
-
     st.altair_chart(c, use_container_width=True)
 
 
 def main():
-    st.title("News Classifier App")
-    menu = ["Home", "Saved Logs", "About"]
-    choice = st.sidebar.selectbox("Menu", menu)
-    raw_text = ""
+    st.title("📰 News Classifier App")
+    st.subheader("Classify a news article!")
+    st.text("Write a news article headline in the prompt below.")
+    st.text(
+        "The app will classify it in one of 4 different categories: World, Sport, Business or Sci/Tech."
+    )
 
-    if choice == "Home":
-        st.subheader("Classify News from Headlines")
-        with st.form(key="news_clf_form"):
-            raw_text = st.text_area("Type Here")
-            submit_text = st.form_submit_button(label="Submit")
-        if submit_text:
-            col1, col2 = st.columns(2)
+    with st.form(key="news_clf_form"):
+        raw_text = st.text_area("Type Here")
+        submit_text = st.form_submit_button(label="Submit")
 
-            pred_label: pd.DataFrame = request_to_lambda(request_text=raw_text)
-            max_label: str = pred_label.max().to_dict()["label"]
+    if submit_text:
 
-            with col1:
-                st.info("Original Text")
-                st.write(raw_text)
-                st.info("Prediction")
-                st.write(pretty_print_label(max_label))
+        pred_label: pd.DataFrame = request_to_lambda(request_text=raw_text)
+        max_label: str = pred_label.max().to_dict()["label"]
 
-            with col2:
-                st.info("Prediction Probability")
-                preds_df = pd.DataFrame(pred_label)
-                preds_df = preprocess_preds_df(preds_df)
+        st.info("Prediction")
+        st.markdown(pretty_print_label(max_label))
 
-                create_table(preds_df)
-                create_chart(raw_text, preds_df)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info("Original Text")
+            st.markdown(raw_text)
 
-    if choice == "Saved Logs":
-        st.subheader("Logs")
-    if choice == "About":
-        st.subheader("About")
+        with col2:
+            st.info("Prediction Probability")
+            preds_df = pd.DataFrame(pred_label)
+            preds_df = preprocess_preds_df(preds_df)
+
+            create_table(preds_df)
+            create_chart(preds_df)
 
 
 if __name__ == "__main__":
