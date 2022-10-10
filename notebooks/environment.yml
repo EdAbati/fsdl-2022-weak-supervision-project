@@ -1,0 +1,27 @@
+name: notebook-env
+channels:
+  - pytorch
+  - defaults
+  - pyg
+  - conda-forge
+dependencies:
+  - python=3.8
+  - cudatoolkit=11.3
+  - pytorch==1.12
+  - pip
+  - notebook
+  - ipykernel
+  - ipywidgets
+  - pip:
+      - transformers[torch,sentencepiece]==4.22
+      - datasets==2.5
+      - matplotlib
+      - jupyterlab
+      - psutil
+      - accelerate==0.12
+      - evaluate==0.2.2
+      - scikit-learn==1.1.2
+      - wandb
+      - pytorch-lightning==1.6.3
+      - rubrix[listeners]
+      - small-text

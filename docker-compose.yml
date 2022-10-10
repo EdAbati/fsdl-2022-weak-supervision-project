@@ -103,6 +103,8 @@ services:
     volumes:
       - streamlit-cachedata:/root/.cache
   rubrix:
+    env_file: .env
+    container_name: ${USER_NAME-test}-rubrix
     image: recognai/rubrix:latest
     restart: unless-stopped
     ports:
@@ -110,13 +112,15 @@ services:
     environment:
       ELASTICSEARCH: http://elasticsearch:9200
       # RUBRIX_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
-      RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD: ${RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD-$$2y$$05$$X1i7R1R7CeFyD/dxZ5ttu.FcJQbL2Gh30.86OxCxzTXl/BR.RO.6O}
+      # RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD: ${RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD-$$2y$$05$$X1i7R1R7CeFyD/dxZ5ttu.FcJQbL2Gh30.86OxCxzTXl/BR.RO.6O}
     # volumes:
     #   - ./services/rubrix/src/config/.users.yaml:/config/.users.yaml
     networks:
       - rubrix
 
   elasticsearch:
+    env_file: .env
+    container_name: ${USER_NAME-test}-elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
     ports:
       - "9200:9200"
@@ -144,6 +148,8 @@ services:
     networks:
       - rubrix
   kibana:
+    env_file: .env
+    container_name: ${USER_NAME-test}-kibana
     image: docker.elastic.co/kibana/kibana:7.11.1
     ports:
       - 5601:5601
