@@ -32,6 +32,16 @@ services:
       # # enable auth on
       # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.middlewares=${STACK_NAME?Variable not set}-traefik-dashboard-auth
       # - traefik.http.middlewares.${STACK_NAME?Variable not set}-traefik-dashboard-auth.basicauth.users=user:$$2y$$05$$903CSuS1Cd8qfunjKpLXoO3szTEa2RuVj9MA73EfxeoGjeeuGXHsm
+  lambda:
+    ports:
+      - 9000:8080
+    volumes:
+      - ./services/lambda/api/app.py:/var/task/app.py
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+      - traefik.http.routers.${STACK_NAME?Variable not set}-lambda-local-http.rule=PathPrefix(`/lambda-local`)
+      - traefik.http.services.${STACK_NAME?Variable not set}-lambda-local.loadbalancer.server.port=8080
 
   jupyter:
     volumes:
@@ -85,16 +95,6 @@ services:
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
       - traefik.http.routers.${STACK_NAME?Variable not set}-kibana-http.rule=PathPrefix(`/kibana`)
       - traefik.http.services.${STACK_NAME?Variable not set}-kibana.loadbalancer.server.port=5601
-  lambda:
-    ports:
-      - 9000:8080
-    volumes:
-      - ./services/lambda/api/app.py:/var/task/app.py
-    labels:
-      - traefik.enable=true
-      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-      - traefik.http.routers.${STACK_NAME?Variable not set}-lambda-local-http.rule=PathPrefix(`/lambda-local`)
-      - traefik.http.services.${STACK_NAME?Variable not set}-lambda-local.loadbalancer.server.port=8080
 
 networks:
   traefik-public:

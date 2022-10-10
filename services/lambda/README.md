@@ -13,11 +13,11 @@ Requirements:
 
 - [Docker](https://docs.docker.com/get-docker/)
 
-Create and start the API as a local docker container:
+Create and start the API as a local docker container using docker-compose
 
 ```bash
-make build_aws_lambda_image
-make run_local_aws_lambda
+docker compose build lambda
+docker compose -f docker-compose.yml -f docker-compose.override.yml up -d lambda
 ```
 
 Testing with `curl`:
@@ -38,6 +38,8 @@ headers = {"Content-Type": "application/json"}
 payload = json.dumps({"text": 'A test sentence.'})
 response = requests.post(url, data=payload, headers=headers)
 ```
+
+Testing running the code in the [`notebooks/query_model_api.ipynb`](../../notebooks/query_model_api.ipynb) notebook.
 
 ## Deploy API to AWS Lambda
 
