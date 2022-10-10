@@ -25,6 +25,11 @@ Create a virtual environment using `conda`: `make conda-env-and-update`
 
 ## Usage
 
+The project includes many services. They are either running as docker containers or available as public online services.
+
+![main-diagram](./docs/main_diagram.drawio.png)
+
+
 ### Register model in W&B and convert to TorchScript
 
 1. Add a registered model in the W&B model registry (guide [here](https://docs.wandb.ai/guides/models#model-registry-quickstart))
