@@ -1070,6 +1070,20 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "modAL"
+version = "0.4.1"
+description = "A modular active learning framework for Python3"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+numpy = ">=1.13"
+pandas = ">=1.1.0"
+scikit-learn = ">=0.18"
+scipy = ">=0.18"
+
+[[package]]
 name = "multidict"
 version = "6.0.2"
 description = "multidict implementation"
@@ -1968,6 +1982,25 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
+name = "skorch"
+version = "0.12.0"
+description = "scikit-learn compatible neural network library for pytorch"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+numpy = ">=1.13.3"
+scikit-learn = ">=0.22.0"
+scipy = ">=1.1.0"
+tabulate = ">=0.7.7"
+tqdm = ">=4.14.0"
+
+[package.extras]
+docs = ["Sphinx", "numpydoc", "sphinx-rtd-theme"]
+testing = ["pytest", "pytest-cov"]
+
+[[package]]
 name = "smmap"
 version = "5.0.0"
 description = "A pure Python implementation of a sliding window memory map manager"
@@ -2072,6 +2105,17 @@ python-versions = ">=3.8"
 pandas = ">=1.2"
 python-decouple = ">=3.6,<4.0"
 streamlit = ">=0.87.0"
+
+[[package]]
+name = "tabulate"
+version = "0.9.0"
+description = "Pretty-print tabular data"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+widechars = ["wcwidth"]
 
 [[package]]
 name = "tensorboard"
@@ -2530,7 +2574,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.10.2"
-content-hash = "a46486e897293cec54b8ccdff516bab5e5609baca094614ca55e3b23476bc3f2"
+content-hash = "2e5d29ce36a040af5692ef367e6309aa630960fd5a39a80dc22fa5c716e742cf"
 
 [metadata.files]
 absl-py = [
@@ -3353,6 +3397,10 @@ mccabe = [
 mistune = [
     {file = "mistune-2.0.4-py2.py3-none-any.whl", hash = "sha256:182cc5ee6f8ed1b807de6b7bb50155df7b66495412836b9a74c8fbdfc75fe36d"},
     {file = "mistune-2.0.4.tar.gz", hash = "sha256:9ee0a66053e2267aba772c71e06891fa8f1af6d4b01d5e84e267b4570d4d9808"},
+]
+modAL = [
+    {file = "modAL-0.4.1-py3-none-any.whl", hash = "sha256:6d24e4578b00b43d8114f55004d8aa126b37cbb50fde98a3dc9089a042803d23"},
+    {file = "modAL-0.4.1.tar.gz", hash = "sha256:daea01cfdf52a7462702b392c4ca430bc3c3a36256b4864b3f28b3b95202b567"},
 ]
 multidict = [
     {file = "multidict-6.0.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:0b9e95a740109c6047602f4db4da9949e6c5945cefbad34a1299775ddc9a62e2"},
@@ -4275,6 +4323,11 @@ six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
 ]
+skorch = [
+    {file = "skorch-0.12.0-py3-none-any.whl", hash = "sha256:fd41a93eaffe8f26695a74eb404af86e179aaf15cdeea1af2ee3eb0bc2f7a98d"},
+    {file = "skorch-0.12.0-py3.9.egg", hash = "sha256:152560a0a9eecde87cb0f21b4547a091e381c2a71f34dec22a9fa19ceeb186a5"},
+    {file = "skorch-0.12.0.tar.gz", hash = "sha256:2d132ceca9a2345ddfde3a8bb17ebc39ab3c7da8c1244fd7928f47828876e2f5"},
+]
 smmap = [
     {file = "smmap-5.0.0-py3-none-any.whl", hash = "sha256:2aba19d6a040e78d8b09de5c57e96207b09ed71d8e55ce0959eeee6c8e190d94"},
     {file = "smmap-5.0.0.tar.gz", hash = "sha256:c840e62059cd3be204b0c9c9f74be2c09d5648eddd4580d9314c3ecde0b30936"},
@@ -4302,6 +4355,10 @@ streamlit = [
 streamlit-aggrid = [
     {file = "streamlit-aggrid-0.3.3.tar.gz", hash = "sha256:d96edb102df98450f3b6bcf5a52b64e6ceef9678e82e2dba9cfef074e7f134ab"},
     {file = "streamlit_aggrid-0.3.3-py3-none-any.whl", hash = "sha256:c5202347b1257c4246ef3541b233866f57bc930b97040be58b059093c4fee22e"},
+]
+tabulate = [
+    {file = "tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f"},
+    {file = "tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c"},
 ]
 tensorboard = [
     {file = "tensorboard-2.10.1-py3-none-any.whl", hash = "sha256:fb9222c1750e2fa35ef170d998a1e229f626eeced3004494a8849c88c15d8c1c"},
