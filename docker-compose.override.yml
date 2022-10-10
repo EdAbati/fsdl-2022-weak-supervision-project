@@ -32,29 +32,16 @@ services:
       # # enable auth on
       # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.middlewares=${STACK_NAME?Variable not set}-traefik-dashboard-auth
       # - traefik.http.middlewares.${STACK_NAME?Variable not set}-traefik-dashboard-auth.basicauth.users=user:$$2y$$05$$903CSuS1Cd8qfunjKpLXoO3szTEa2RuVj9MA73EfxeoGjeeuGXHsm
-
-  restapi:
+  lambda:
     ports:
-      - "8888:80"
+      - 9000:8080
     volumes:
-      - ./services/restapi/src/myapp:/app/myapp
-    environment:
-      - SERVER_HOST=http://${DOMAIN?Variable not set}
-      - FASTAPI_DEBUG=true
-    build:
-      context: ./services/restapi/src
-      dockerfile: Dockerfile
-      args:
-        BACKEND_APP_MODULE: ${BACKEND_APP_MODULE-app.main:app}
-        BACKEND_PRE_START_PATH: ${BACKEND_PRE_START_PATH-/app/prestart.sh}
-        BACKEND_PROCESS_MANAGER: ${BACKEND_PROCESS_MANAGER-uvicorn}
-        BACKEND_WITH_RELOAD: ${BACKEND_WITH_RELOAD-true}
-        INSTALL_DEV: ${INSTALL_DEV-true}
+      - ./services/lambda/api/app.py:/var/task/app.py
     labels:
       - traefik.enable=true
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)  || PathPrefix(`/webapp`)
-      - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=80
+      - traefik.http.routers.${STACK_NAME?Variable not set}-lambda-local-http.rule=PathPrefix(`/lambda-local`)
+      - traefik.http.services.${STACK_NAME?Variable not set}-lambda-local.loadbalancer.server.port=8080
 
   jupyter:
     volumes:

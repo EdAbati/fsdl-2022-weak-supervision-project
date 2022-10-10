@@ -86,12 +86,10 @@ IMAGE_URI = $(ECR_URI)/$(CONTAINER_NAME)
 
 .PHONY: build_aws_lambda_image
 build_aws_lambda_image: ## Build AWS Lambda docker image locally
-	cd services/api-serverless/api && \
-	docker build -t $(CONTAINER_NAME) . --platform=linux/amd64
+	docker build -t $(CONTAINER_NAME) . -f services/api-serverless/api/Dockerfile --platform=linux/amd64
 
 .PHONY: run_local_aws_lambda
 run_local_aws_lambda: ## Run AWS lambda docker image locally
-	cd services/api-serverless/api && \
 	docker run -p 9000:8080 $(CONTAINER_NAME)
 
 .PHONY: authenticate_aws_ecr
