@@ -1,16 +1,18 @@
 # FSDL Course 2022 - Weak Supervision and Deep Learning with text data
+
 Team 44
 
 # Weakly supervised dataset with unlabeled data from AG NEWS dataset
 
 https://huggingface.co/datasets/bergr7/weakly_supervised_ag_news
 
-````python
+```python
 from datasets import load_dataset
 dataset = load_dataset("bergr7/weakly_supervised_ag_news")
-````
+```
 
 ## Source data
+
 AG is a collection of more than 1 million news articles. News articles have been
 gathered from more than 2000 news sources by ComeToMyHead in more than 1 year of
 activity. ComeToMyHead is an academic news search engine which has been running
@@ -30,9 +32,9 @@ in Neural Information Processing Systems 28 (NIPS 2015).
 
 Create a new virtual envinronment(You need to have conda installed):
 
-````bash
+```bash
 conda env create -f environment.yml
-````
+```
 
 ## How to run Rubrix
 
@@ -42,15 +44,15 @@ Requisites -> Docker
 
 Create container with ElasticSearch for Rubrix:
 
-````Docker
+```Docker
 docker run -d --name elasticsearch-for-rubrix -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
-````
+```
 
 Then with the venv activate run:
 
-````bash
+```bash
 python -m rubrix
-````
+```
 
 Afterward, you should be able to access the web app at http://localhost:6900/. The default username and password are rubrix and 1234.
 

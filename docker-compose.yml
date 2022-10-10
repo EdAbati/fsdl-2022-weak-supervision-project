@@ -97,17 +97,33 @@ services:
       context: ./services/jupyter/src
     volumes:
       - ./services/jupyter/src/notebooks:/src/notebooks
+      - jupyter-cachedata:/root/.cache
     ports:
       - "10000:8888"
-    # depends_on:
-    #   - db
-    env_file:
-      - .env
-    # build:
-    #   context: ./services/jupyter/src
-    #   dockerfile: Dockerfile
+    environment:
+      - WANDB_LOG_MODEL=true
+      - WANDB_DIR=/src
+      - WANDB_API_KEY=${WANDB_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - PROJECT_NAME=${PROJECT_NAME}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
     networks:
       - rubrix
+  streamlit:
+    image: "${DOCKER_IMAGE_STREAMLIT_UI?Variable not set}:${TAG-latest}"
+    build:
+      context: ./services/streamlit/src
+    env_file:
+      - .env
+    environment:
+      - LAMBDA_URL=${LAMBDA_URL-http://lambda:8080/2015-03-31/functions/function/invocations}
+    networks:
+      - rubrix
+    volumes:
+      - streamlit-cachedata:/root/.cache
   rubrix:
     image: recognai/rubrix:latest
     restart: unless-stopped
@@ -140,7 +156,6 @@ services:
       - rubrix
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
-
   kibana:
     image: docker.elastic.co/kibana/kibana:7.11.1
     ports:
@@ -161,3 +176,5 @@ networks:
 volumes:
   # app-db-data-test:
   elasticdata:
+  jupyter-cachedata:
+  streamlit-cachedata:

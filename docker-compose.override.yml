@@ -46,6 +46,10 @@ services:
   jupyter:
     volumes:
       - ./services/jupyter/src/notebooks:/src/notebooks
+      - ./services/jupyter/src/app:/src/app
+      - ./services/jupyter/src/pyproject.toml:/src/pyproject.toml
+      - ./services/jupyter/src/poetry.toml:/src/poetry.toml
+      - ./services/jupyter/src/poetry.lock:/src/poetry.lock
     ports:
       - "10000:8888"
     labels:
@@ -53,6 +57,16 @@ services:
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
       - traefik.http.routers.${STACK_NAME?Variable not set}-jupyter-http.rule=PathPrefix(`/jupyter`)
       - traefik.http.services.${STACK_NAME?Variable not set}-jupyter.loadbalancer.server.port=8888
+  streamlit:
+    volumes:
+      - ./services/streamlit/src/app:/src/app
+      - ./services/streamlit/src/poetry.lock:/src/poetry.lock
+      - ./services/streamlit/src/pyproject.toml:/src/pyproject.toml
+      - ./services/streamlit/src/poetry.toml:/src/poetry.toml
+      # - ./services/streamlit/src/.streamlit:/root/.streamlit
+    ports:
+      - "8030:80"
+
   rubrix:
     ports:
       - "6900:80"
@@ -81,6 +95,7 @@ services:
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
       - traefik.http.routers.${STACK_NAME?Variable not set}-kibana-http.rule=PathPrefix(`/kibana`)
       - traefik.http.services.${STACK_NAME?Variable not set}-kibana.loadbalancer.server.port=5601
+
 networks:
   traefik-public:
     # For local dev, don't expect an external Traefik network

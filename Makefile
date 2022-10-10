@@ -35,8 +35,11 @@ down: ## stop docker-compose
 ps: ## get info about running containers
 	@docker compose ps
 
-restapi.test: ## run pytest in the restapi
-	@docker compose exec restapi pytest
+jupyter.model.train.default: ## train model inside the jupyter container with default arguments.
+	@docker compose -f docker-compose.yml -f docker-compose.nvidia.yml exec -it jupyter fsdl-project-cli train
+
+jupyter.model.train.help: ## Get help for training model inside the jupyter container.
+	@docker compose -f docker-compose.yml -f docker-compose.nvidia.yml exec -it jupyter fsdl-project-cli train --help
 
 dev.all.up: ## start docker-compose in dev mode
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
@@ -49,31 +52,6 @@ dev.all.ps: ## start docker-compose ps
 
 dev.all.down: ## stop docker-compose in dev mode
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml down
-
-dev.restapi.shell: ## open shell in restapi container
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml exec restapi bash
-
-dev.restapi.test: ## open shell in restapi container
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml exec restapi pytest
-
-dev.restapi.tempshell: ## open temp shell in restapi container using run --rm
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml run --rm --entrypoint bash restapi
-
-dev.restapi.up: ## launch restapi service in detached mode
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d restapi
-
-dev.restapi.down: ## stop restapi service
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml down restapi
-
-dev.restapi.build: ## build restapi container
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml build restapi
-
-dev.db.shell: ## open shell in restapi container
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml exec db bash
-
-dev.restapi.logs: ## fetch logs from restapi container
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml logs -ft restapi
-
 
 # AWS API related actions
 # Based on the Makefile of https://github.com/caseyfitz/cookiecutter-disco-pie

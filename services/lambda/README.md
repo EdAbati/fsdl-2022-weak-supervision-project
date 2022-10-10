@@ -50,7 +50,6 @@ Requirements:
 - [AWS CLI](https://aws.amazon.com/cli/) installed and configured
 - a `.env` file in the root of this project (based on `.env.sample`). Set the `AWS_ACCOUNT_ID` and `AWS_REGION` variables in this file.
 
-
 1. Create a docker image and push to the ECR repository: `make deploy_to_aws_ecr`
 2. Create a IAM role for the Lambda function: `make create_lambda_role`
 3. Create the Lambda function: `make create_lambda_function`

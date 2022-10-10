@@ -18,11 +18,15 @@ class NewsTextClassifier:
     def __init__(self, model_path):
         self.model = torch.jit.load(model_path)
         self.tokenizer_checkpoint = "distilbert-base-uncased"
-        self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_checkpoint)
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            self.tokenizer_checkpoint
+        )
 
     @torch.no_grad()
     def predict(self, text: str) -> torch.Tensor:
-        tokenized_text = self.tokenizer(text, truncation=True, return_tensors="pt")
+        tokenized_text = self.tokenizer(
+            text, truncation=True, return_tensors="pt"
+        )
         # return tokenized_text
         y_pred = self.model(**tokenized_text)[0].softmax(dim=-1)
         return y_pred
@@ -64,6 +68,12 @@ def lambda_handler(event, context):
     event_dict = _json_str_to_dict(event)
     text = load_text(event_dict)
     if text is None:
-        return {"statusCode": 400, "body": {"message": "'text' not found in body of request"}}
+        return {
+            "statusCode": 400,
+            "body": {"message": "'text' not found in body of request"},
+        }
     predictions_dict = get_predicted_labels(text=text)
-    return {"statusCode": 200, "body": {"predicted_labels": predictions_dict}}
+    return {
+        "statusCode": 200,
+        "body": json.dumps({"predicted_labels": predictions_dict}),
+    }

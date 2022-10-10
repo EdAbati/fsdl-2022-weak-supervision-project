@@ -1,0 +1,89 @@
+[tool.poetry]
+authors = ["example <email@example.com>", "example 2 <email2@example.com>"]
+description = "A bunch of tools for training models"
+name = "fsdl-2022-weak-supervision-project-jupyter"
+packages = [
+  {include = "app"},
+]
+version = "0.1.0"
+
+[tool.poetry.scripts]
+fsdl-project-cli = "app.cli:app"
+
+[tool.poetry.dependencies]
+datasets = "^2.5.2"
+git-lfs = "^1.6"
+jupyterlab = "^3.4.8"
+pydantic = "^1.10.2"
+python = "~3.10.2"
+requests = "^2.28.1"
+scikit-learn = "^1.1.2"
+seaborn = "^0.12.0"
+streamlit = "^1.12.2"
+streamlit-aggrid = "^0.3.3"
+torch = {version = "^1.10.2", source = "torch"}
+transformers = "^4.22.2"
+typer = "^0.6.1"
+wandb = "^0.13.3"
+boto3 = {version = "^1.24.89", source = "pypi"}
+
+[tool.poetry.dev-dependencies]
+black = "^22.8.0"
+flake8 = "^5.0.4"
+ipykernel = "^6.15.3"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+log_cli = true
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+log_cli_format = "%(asctime)s [%(levelname)s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_level = "INFO"
+minversion = "6.0"
+testpaths = [
+  "src/tests",
+]
+
+[tool.black]
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+include = '\.pyi?$'
+line-length = 79
+target-version = ['py37']
+
+[tool.isort]
+line_length = 79
+multi_line_output = 3
+profile = "black"
+
+# https://github.com/pytorch/pytorch/issues/64520#issuecomment-1162882482
+# lambdalabs uses cuda 11.6
+# nvcc -V
+# nvcc: NVIDIA (R) Cuda compiler driver
+# Copyright (c) 2005-2022 NVIDIA Corporation
+# Built on Tue_Mar__8_18:18:20_PST_2022
+# Cuda compilation tools, release 11.6, V11.6.124
+# Build cuda_11.6.r11.6/compiler.31057947_0
+[[tool.poetry.source]]
+default = false
+name = "torch"
+url = "https://download.pytorch.org/whl/cu116"

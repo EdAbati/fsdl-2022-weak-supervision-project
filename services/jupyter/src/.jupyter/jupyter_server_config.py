@@ -391,9 +391,7 @@
 #                        The string should be of the form type:salt:hashed-
 #  password.
 #  Default: ''
-c.ServerApp.password = (
-    "argon2:$argon2id$v=19$m=10240,t=10,p=8$BMCrabx6jDQ6HGA7kvclzA$80qXrsBIzfGU65s/J8xP8jQKYcN5DjLCyrhPFXZemwQ"
-)
+c.ServerApp.password = "argon2:$argon2id$v=19$m=10240,t=10,p=8$BMCrabx6jDQ6HGA7kvclzA$80qXrsBIzfGU65s/J8xP8jQKYcN5DjLCyrhPFXZemwQ"
 
 ## Forces users to use a password for the Jupyter server.
 #                        This is useful in a multi user environment, for instance when
