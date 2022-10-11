@@ -7,17 +7,17 @@ It includes the following files and folders:
 - `api/Dockerfile` - The Dockerfile to build the container image for local testing.
 - `api/requirements.txt` - The pip requirements installed in the test container.
 
-## Create API locally in a Docker container
+## Start API locally in a Docker container
 
 Requirements:
 
 - [Docker](https://docs.docker.com/get-docker/)
 
-Create and start the API as a local docker container using docker-compose
+Create and start the API as a local docker container using `docker-compose`:
 
 ```bash
 docker compose build lambda
-docker compose -f docker-compose.yml -f docker-compose.override.yml up -d lambda
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d lambda
 ```
 
 Testing with `curl`:
@@ -53,3 +53,14 @@ Requirements:
 1. Create a docker image and push to the ECR repository: `make deploy_to_aws_ecr`
 2. Create a IAM role for the Lambda function: `make create_lambda_role`
 3. Create the Lambda function: `make create_lambda_function`
+
+
+## Contributing to the Lambda API service
+
+If you want to contribute to this service you should:
+
+1. Update one or more of the following files (based on how you want to change the API):
+    - `app.py`: the logic of the API, the `lambda_handler` function is the entrypoint for the AWS Lambda function
+    - `requirements.txt`: the python requirements of the app
+    - `Dockerfile`: in case you want to change external dependency or the build of the image
+2. Create and test API locally as described in '[Create API locally in a Docker container](/services/lambda/README.md#start-api-locally-in-a-docker-container)'
