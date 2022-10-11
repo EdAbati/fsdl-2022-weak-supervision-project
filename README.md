@@ -1,12 +1,39 @@
-# FSDL 2022: Weak Supervision Project
+# FSDL Course 2022 - Weak Supervision and Deep Learning with text data
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/EdAbati/fsdl-2022-weak-supervision-project/main.svg)](https://results.pre-commit.ci/latest/github/EdAbati/fsdl-2022-weak-supervision-project/main)
 
-Authors:
+Team 44:
 
 - ...
 
 ## Description
+
+### Source data
+
+AG is a collection of more than 1 million news articles. News articles have been
+gathered from more than 2000 news sources by ComeToMyHead in more than 1 year of
+activity. ComeToMyHead is an academic news search engine which has been running
+since July, 2004. The dataset is provided by the academic comunity for research
+purposes in data mining (clustering, classification, etc), information retrieval
+(ranking, search, etc), xml, data compression, data streaming, and any other
+non-commercial activity. For more information, please refer to the link
+http://www.di.unipi.it/~gulli/AG_corpus_of_news_articles.html .
+
+The AG's news topic classification dataset is constructed by Xiang Zhang
+(xiang.zhang@nyu.edu) from the dataset above. It is used as a text
+classification benchmark in the following paper: Xiang Zhang, Junbo Zhao, Yann
+LeCun. Character-level Convolutional Networks for Text Classification. Advances
+in Neural Information Processing Systems 28 (NIPS 2015).
+
+### Weakly supervised dataset with unlabeled data from AG NEWS dataset
+
+https://huggingface.co/datasets/bergr7/weakly_supervised_ag_news
+
+```python
+from datasets import load_dataset
+dataset = load_dataset("bergr7/weakly_supervised_ag_news")
+```
+
 
 ...
 
@@ -29,6 +56,20 @@ The project includes many services. They are either running as docker containers
 
 ![main-diagram](./docs/main_diagram.drawio.png)
 
+### Rubrix
+
+Launch locally the `rubrix` service (you also need the `elasticsearch` and `kibana` service):
+
+```bash
+docker compose -f docker-compose.yml up -d rubrix elasticsearch kibana
+```
+
+Afterward, you should be able to access the web app at http://localhost:6900/.
+
+The default username and password are `rubrix` and `1234`.
+
+![Rules on Rubrix](/docs//rules_rubrix.png)
+
 
 ### Register model in W&B and convert to TorchScript
 
@@ -43,10 +84,24 @@ This will register the model artifact in the registry and it will convert it int
 
 ## Contributing
 
-Create a dev environment running the following commands:
+As the project is made by multiple services, please follow the guide corresponding to the service you want to contribute to
 
-1. Create a virtual environment using `conda`: `make conda-env-and-update`
-2. Install `pre-commit` hooks: `make install-pre-commit`
+### Main app and notebooks
+
+#### with Conda
+
+1. Create a dev environment either with `conda` or with `docker`(suggested way):
+
+    - **Conda**: Create a virtual environment: `make conda-env-and-update`.
+
+      (Optional) Install `pre-commit` hooks: `make install-pre-commit`
+
+    - **Docker**: Launch locally the `main-app`service using the `dev` config for `docker-compose`. This will mount the local directory to the container and it will allow you to change the local files and see changes in the container straight away:
+
+      ```bash
+      docker compose build main-app
+      docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d main-app
+      ```
 
 ## Using docker-compose
 
