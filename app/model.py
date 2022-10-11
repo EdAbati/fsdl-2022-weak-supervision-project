@@ -30,17 +30,6 @@ def compute_metrics(pred):
     return {"accuracy": acc, "f1": f1}
 
 
-def test_model(model, test_data, tokenizer):
-    trainer = Trainer(
-        model=model,
-        tokenizer=tokenizer,
-        compute_metrics=compute_metrics,
-    )
-    model.eval()
-    trainer.predict(test_data)
-    return trainer
-
-
 def train_model(
     model,
     wandb_name: str,
@@ -124,6 +113,15 @@ def load_model_from_wandb(
 
     return model
 
+def test_model(model, test_data, tokenizer):
+    trainer = Trainer(
+        model=model,
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics,
+    )
+    model.eval()
+    trainer.predict(test_data)
+    return trainer
 
 def test_routine(model: Optional[Any] = None):
 
