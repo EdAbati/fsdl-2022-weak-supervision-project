@@ -1,4 +1,4 @@
-name: weak-active-learner-streamlit
+name: streamlit
 channels:
   - defaults
   - conda-forge
