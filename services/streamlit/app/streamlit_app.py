@@ -75,8 +75,8 @@ def create_chart(preds_df: pd.DataFrame):
 def main():
     st.title("📰 News Classifier App")
     st.subheader("Classify a news article!")
-    st.text("Write a news article headline in the prompt below.")
-    st.text(
+    st.markdown("Write a news article headline in the prompt below.")
+    st.markdown(
         "The app will classify it in one of 4 different categories: World, Sport, Business or Sci/Tech."
     )
 
@@ -85,12 +85,14 @@ def main():
         submit_text = st.form_submit_button(label="Submit")
 
     if submit_text:
-
-        pred_label: pd.DataFrame = request_to_lambda(request_text=raw_text)
-        max_label: str = pred_label.max().to_dict()["label"]
+        with st.spinner("Getting predictions..."):
+            pred_label: pd.DataFrame = request_to_lambda(request_text=raw_text)
+            pred_string: str = pred_label.loc[
+                pred_label["score"].idxmax(), "label"
+            ]
 
         st.info("Prediction")
-        st.markdown(pretty_print_label(max_label))
+        st.markdown(pretty_print_label(pred_string))
 
         col1, col2 = st.columns(2)
         with col1:

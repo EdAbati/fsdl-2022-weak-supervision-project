@@ -12,6 +12,6 @@ conda-env-and-update: # Create and update a virtual environment using conda
 	conda env update --prune -f environment.yml
 	@echo "!!! PLEASE ACTIVATE CONDA ENVIRONMENT !!!"
 
-pip-tools: # Compile and install exact pip packages
+.PHONY: pip-tools
+pip-tools: # Compile pip packages
 	pip-compile requirements.in
-	pip-sync requirements.txt

@@ -10,15 +10,14 @@ RUN mkdir -p /src/
 WORKDIR /src/
 
 # Build environment
-RUN conda env create -f environment.yml
 COPY requirements.txt /src/
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt  --no-cache-dir
 
 # copy application
 COPY app /src/app
 COPY .streamlit /root/.streamlit
 
-EXPOSE 80
+EXPOSE 8501
 
 ENTRYPOINT ["streamlit"]
 CMD [ "run", "/src/app/streamlit_app.py" ]
