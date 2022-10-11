@@ -7,6 +7,8 @@ import wandb
 from rich import print
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+from app.config import NUM_LABELS
+
 # Paths
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_MODELS_PATH = PROJECT_ROOT / "models"
@@ -20,16 +22,12 @@ DEFAULT_WANDB_MODEL_REGISTRY__ARTIFACT_NAME = (
 )
 DEFAULT_WANDB_MODEL_REGISTRY__ARTIFACT_ALIAS = "prod"
 
-NUM_LABELS = 4
-
-app = typer.Typer()
-
+# Typer help messages
 TYPER_ARTIFACT_NAME_HELP = "The name of the W&B model artifact to be used in the format [entity]/[project]/[artifact_name]:[alias]"
 TYPER_MODEL_NAME_HELP = "The name of the W&B model in the registry in the format [entity]/[project]/[model_name]"
 TYPER_MODEL_ALIAS_HELP = "Alias of the model to be used in the W&B model registry. You can pass this option multiple times to register multiple aliases."
 
 
-@app.command()
 def register_artifact(
     artifact_name: str = typer.Option(
         ...,
@@ -90,7 +88,6 @@ def convert_model_to_torchscript(model_dir: str) -> torch.jit.ScriptModule:
     return torch.jit.trace(model, tuple(dummy_tokenized_input.values()))
 
 
-@app.command()
 def register_and_convert_model(
     artifact_name: str = typer.Option(
         ...,
@@ -114,7 +111,3 @@ def register_and_convert_model(
     torch.jit.save(traced_model, DEFAULT_TRACED_MODEL_PATH)
     print("[green]Model successfully registered, converted and saved![/green]")
     return DEFAULT_TRACED_MODEL_PATH
-
-
-if __name__ == "__main__":
-    app()

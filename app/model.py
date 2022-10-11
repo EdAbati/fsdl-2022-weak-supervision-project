@@ -1,10 +1,6 @@
 from typing import Any, Optional
 
-import boto3
-import torch
 import wandb
-from app.config import settings
-from datasets import ClassLabel, Features, Value, load_dataset
 from pydantic import BaseModel
 from sklearn.metrics import accuracy_score, f1_score
 from transformers import (
@@ -14,54 +10,8 @@ from transformers import (
     TrainingArguments,
 )
 
-NUM_LABELS = 4
-
-
-def load_data(dataset_name: str = "bergr7/weakly_supervised_ag_news") -> tuple:
-
-    # files
-    labeled_data_files = {
-        "train": "train.csv",
-        "validation": "validation.csv",
-        "test": "test.csv",
-    }
-
-    unlabeled_data_files = {"unlabeled": "unlabeled_train.csv"}
-    # features
-    labeled_features = Features(
-        {
-            "text": Value("string"),
-            "label": ClassLabel(
-                num_classes=4,
-                names=["World", "Sports", "Business", "Sci/Tech"],
-            ),
-        }
-    )
-    unlabeled_features = Features({"text": Value("string")})
-
-    # load data
-    labeled_dataset_train = load_dataset(
-        dataset_name,
-        data_files=labeled_data_files,
-        features=labeled_features,
-        split="train",
-    )
-
-    labeled_dataset_val = load_dataset(
-        dataset_name,
-        data_files=labeled_data_files,
-        features=labeled_features,
-        split="validation",
-    )
-
-    labeled_dataset_test = load_dataset(
-        dataset_name,
-        data_files=labeled_data_files,
-        features=labeled_features,
-        split="test",
-    )
-
-    return labeled_dataset_train, labeled_dataset_val, labeled_dataset_test
+from app.config import NUM_LABELS, settings
+from app.data import load_data
 
 
 def get_model(model_ckpt: str):
@@ -80,17 +30,13 @@ def compute_metrics(pred):
 
 
 def test_model(model, test_data, tokenizer):
-
     trainer = Trainer(
         model=model,
         tokenizer=tokenizer,
         compute_metrics=compute_metrics,
     )
-
     model.eval()
-
     trainer.predict(test_data)
-
     return trainer
 
 
@@ -101,7 +47,6 @@ def train_model(
     epochs: int = 1,
     batch_size: int = 64,
 ):
-
     train_dataset, val_dataset, _ = load_data()
 
     tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
@@ -123,12 +68,11 @@ def train_model(
         per_device_eval_batch_size=batch_size,
         weight_decay=0.01,
         evaluation_strategy="epoch",
-        # optim="adamw_torch",
         disable_tqdm=False,
         logging_steps=logging_steps,
         push_to_hub=True,
         report_to="wandb",
-        run_name=wandb_name,  # "distill-bert-base-config",
+        run_name=wandb_name,
         log_level="error",
         hub_token=settings.HF_TOKEN,
     )
@@ -158,29 +102,12 @@ class WandbModelArtifact(BaseModel):
         return f"{self.entity}/{self.project}/{self.artifact_name}:{self.tag}"
 
 
-def upload_to_s3_bucket(
-    torchscript_dir: str = "model.pt",
-    bucket_name: str = "fsdl-model-test",
-    s3_filename: str = "model.pt",
-):
-    s3 = boto3.client(
-        "s3",
-        settings.AWS_REGION,
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    )
-
-    # upload file from local directory to s3 bucket
-    with open(torchscript_dir, "rb") as f:
-        s3.upload_fileobj(f, bucket_name, s3_filename)
-
-
 def load_model_from_wandb(
     artifact_params: WandbModelArtifact, return_dir: bool = False
 ):
 
-    run = wandb.init()
-    artifact = run.use_artifact(str(artifact_params), type="model")
+    api = wandb.Api()
+    artifact = api.artifact(str(artifact_params), type="model")
     artifact_dir = artifact.download()
 
     if return_dir:
@@ -205,7 +132,7 @@ def test_routine(model: Optional[Any] = None):
         entity="team_44",
         project="model-registry",
         artifact_name="distilbert-base-uncased-finetuned-news",
-        tag="v0",
+        tag="prod",
     )
 
     if model is None:
@@ -220,54 +147,6 @@ def test_routine(model: Optional[Any] = None):
     test_encoded = test_dataset.map(tokenize, batched=True, batch_size=None)
 
     results = test_model(model, test_encoded, tokenizer)
-
-
-def convert_model_to_torchscript(
-    model_dir: str, model_ckpt: str
-) -> torch.jit.ScriptModule:
-    """Convert a saved model into TorchScript using tracing."""
-
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_dir, num_labels=NUM_LABELS, torchscript=True
-    )
-
-    # Create example input with
-    # First row in 'ag_news' training dataset
-    dummy_input = {
-        "text": "Wall St. Bears Claw Back Into the Black (Reuters) Reuters - Short-sellers, Wall Street's dwindling\\band of ultra-cynics, are seeing green again.",
-        "label": 2,
-    }
-
-    # load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
-
-    dummy_tokenized_input = tokenizer(
-        dummy_input["text"], truncation=True, return_tensors="pt"
-    )
-
-    return torch.jit.trace(model, tuple(dummy_tokenized_input.values()))
-
-
-def convert_routine():
-    model_ckpt = "distilbert-base-uncased"
-
-    w = WandbModelArtifact(
-        entity="team_44",
-        project="model-registry",
-        artifact_name="distilbert-base-uncased-finetuned-news",
-        tag="v0",
-    )
-
-    model_dir = load_model_from_wandb(w, return_dir=True)
-
-    out = convert_model_to_torchscript(
-        model_dir=model_dir,
-        model_ckpt=model_ckpt,
-    )
-
-    out.save("model.pt")
-
-    return out
 
 
 def train_routine(

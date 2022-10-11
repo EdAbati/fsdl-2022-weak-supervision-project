@@ -1,7 +1,11 @@
 import typer
+
 from app.config import settings
+from app.deploy import register_and_convert_model, register_artifact
 
 app = typer.Typer()
+app.command(register_artifact)
+app.command(register_and_convert_model)
 
 
 @app.command()
@@ -14,7 +18,7 @@ def train(
 ):
     """Trains a model and pushes an artifact to weights and biases"""
 
-    from app.model.train_model import train_routine
+    from app.model import train_routine
 
     train_routine(model_ckpt=wandb_name, epochs=epochs, batch_size=batch_size)
 

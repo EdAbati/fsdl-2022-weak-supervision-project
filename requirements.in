@@ -1,0 +1,12 @@
+# Base requirements
+jupyterlab
+pandas
+numpy
+rubrix[server]==0.17.0
+torch
+wandb
+scikit-learn
+transformers[torch]==4.22
+datasets==2.5
+typer[all]
+black

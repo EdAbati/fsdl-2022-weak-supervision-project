@@ -1,53 +1,17 @@
-[tool.poetry]
-authors = ["example <email@example.com", "example 2 <email2@example.com"]
-description = "A collection of services for the fsdl 2022 project"
-name = "fsdl-2022-weak-supervision-project-main"
-version = "0.1.0"
-
-
-[tool.poetry.dependencies]
-python = "~3.9.13"
-
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^2.20.0"
-black = "^22.8.0"
-flake8 = "^5.0.4"
-ipykernel = "^6.15.3"
-
-[build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core>=1.0.0"]
-
-[tool.pytest.ini_options]
-addopts = "-ra -q"
-log_cli = true
-log_cli_date_format = "%Y-%m-%d %H:%M:%S"
-log_cli_format = "%(asctime)s [%(levelname)s] %(message)s (%(filename)s:%(lineno)s)"
-log_cli_level = "INFO"
-minversion = "6.0"
-testpaths = [
-  "src/tests",
-]
-
 [tool.black]
 exclude = '''
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
+/(
+      .eggs         # exclude a few common directories in the
+    | .git          # root of the project
+    | .hg
+    | .mypy_cache
+    | .tox
+    | venv
     | _build
     | buck-out
     | build
     | dist
   )/
-  | foo.py           # also separately exclude a file named foo.py in
-                     # the root of the project
-)
 '''
 include = '\.pyi?$'
 line-length = 79

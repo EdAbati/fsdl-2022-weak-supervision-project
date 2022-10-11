@@ -1,18 +1,10 @@
-name: weak-supervision-project
+name: weak-active-supervision-project
 channels:
   - defaults
   - conda-forge
 dependencies:
   - python=3.8
   - pip
-  - notebook
-  - ipykernel
   - pip:
-    - notebook
+    - pip-tools
     - pre-commit
-    - transformers[torch]==4.22
-    - datasets==2.5
-    - numpy==1.23
-    - wandb
-    - typer[all]
-    - black
