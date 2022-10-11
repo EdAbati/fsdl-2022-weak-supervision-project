@@ -20,6 +20,11 @@ conda-env-and-update: ## create and update a virtual environment using conda
 install-pre-commit: ## install all pre-commit hooks
 	pre-commit install --install-hooks
 
+.PHONY: pip-tools
+pip-tools: # Compile and install pip packages
+	pip-compile requirements.in
+	pip-sync requirements.txt
+
 build: ## build docker image
 	@docker compose build
 
@@ -41,11 +46,11 @@ jupyter.model.train.default: ## train model inside the jupyter container with de
 jupyter.model.train.help: ## Get help for training model inside the jupyter container.
 	@docker compose -f docker-compose.yml -f docker-compose.nvidia.yml exec -it jupyter fsdl-project-cli train --help
 
-dev.all.up: ## start docker-compose in dev mode
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
+dev.all.up: ## Start docker-compose in dev mode
+	@docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
-dev.all.up.build: ## start docker-compose in dev mode and --build flag to force rebuild
-	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --build
+dev.all.up.build: ## Start docker-compose in dev mode and --build flag to force rebuild
+	@docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 
 dev.all.ps: ## start docker-compose ps
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml ps
@@ -64,7 +69,7 @@ IMAGE_URI = $(ECR_URI)/$(CONTAINER_NAME)
 
 .PHONY: build_aws_lambda_image
 build_aws_lambda_image: ## Build AWS Lambda docker image locally
-	docker build -t $(CONTAINER_NAME) . -f services/api-serverless/api/Dockerfile --platform=linux/amd64
+	docker build -t $(CONTAINER_NAME) . -f services/lambda/api/Dockerfile --platform=linux/amd64
 
 .PHONY: run_local_aws_lambda
 run_local_aws_lambda: ## Run AWS lambda docker image locally
