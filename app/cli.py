@@ -10,11 +10,11 @@ app.command(register_and_convert_model)
 
 @app.command()
 def train(
-    wandb_name: str = typer.Argument(
+    wandb_name: str = typer.Option(
         "distilbert-base-uncased", help="Name for Weights and Biases Logging"
     ),
-    epochs: int = typer.Argument(1, help="number of epochs"),
-    batch_size: int = typer.Argument(64, help="batch size"),
+    epochs: int = typer.Option(1, help="Number of epochs"),
+    batch_size: int = typer.Option(64, help="Batch size"),
 ):
     """Trains a model and pushes an artifact to weights and biases"""
 
