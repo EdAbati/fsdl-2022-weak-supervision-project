@@ -7,7 +7,9 @@ WORKDIR /src/
 COPY conda-environment.yml /src/
 RUN conda env create -f conda-environment.yml
 
-RUN apt-get update -y && apt-get install -y build-essential
+RUN apt-get update -y && \
+    apt-get install -y build-essential git-lfs && \
+	git lfs install
 
 COPY requirements.txt requirements.in /src/
 RUN ["conda" ,"run", "--no-capture-output", "-n", "weak-active-supervision-project", "pip", "install", "-r", "requirements.txt", "--no-cache-dir"]
