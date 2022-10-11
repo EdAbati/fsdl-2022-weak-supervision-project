@@ -56,6 +56,16 @@ The project includes many services. They are either running as docker containers
 
 ![main-diagram](./docs/main_diagram.drawio.png)
 
+This project has the following services:
+
+1. `jupyter`: a Jupyter notebook server with support for the NVIDIA A100-SXM4-40GB GPU (CUDA 11.6) and contains scripts for training and evaluating models
+1. `lambda`: a lambda function for serving predictions
+1. `streamlit`: a Streamlit application for displaying a user interface
+1. `rubrix`: a Rubrix server for annotating data
+1. `elastic`: an Elasticsearch server for storing data from Rubrix
+1. `kibana`: a Kibana server for visualizing data from Elasticsearch
+1. `proxy`: a `traefik` reverse proxy.
+
 ### Rubrix
 
 Launch locally the `rubrix` service (you also need the `elasticsearch` and `kibana` service):
@@ -82,13 +92,28 @@ The default username and password are `rubrix` and `1234`.
 
 This will register the model artifact in the registry and it will convert it into the TorchScript format.
 
+## Use docker-compose
+
+All the services can be launched using `docker-compose`, and its configuration is shared across many `yml` files that can by chained with the `-f` command. Read more about this in the [docker-compose documentation](https://docs.docker.com/compose/extends/). You will need to provide a `.env` file with variables listed in `.env.sample` for this deployment to work.
+
+In particular, the following files are used:
+
+- `docker-compose.yml` (`base`) is used to run the project in a container. It contains all the services a part from the proxy.
+- `docker-compose.override.yml` (`override`) is used to run the project with `traefik` as a proxy service.
+- `docker-compose.dev.yml` (`dev`) is used to run the project as development environment. It exposes many volumes to allow quick prototyping.
+- `docker-compose.nvidia.yml` (`nvidia`) extends the `jupyter` container and adds support for GPU usage.
+
+These can be launched using `make`, e.g. `make dev.all.up` will launch all the services combining the `base` and `override` configs. The `Makefile` contains a list of all the commands.
+
 ## Contributing
 
-As the project is made by multiple services, please follow the guide corresponding to the service you want to contribute to
+As the project is made by multiple services, please follow the guide corresponding to the service you want to contribute to.
+
+### Entire project
+
+If you need to work on a feature that requires all the services to be active and running (e.g. active learning loop with notebook and rubrix), you can run `make dev.all.up.build`.
 
 ### Main app and notebooks
-
-#### with Conda
 
 1. Create a dev environment either with `conda` or with `docker`(suggested way):
 
@@ -102,26 +127,15 @@ As the project is made by multiple services, please follow the guide correspondi
       docker compose build main-app
       docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d main-app
       ```
+2. Update the code in the folder:
 
-## Using docker-compose
+    - `app`: contains the main code of the application (model training, deployment)
+    - `notebook`: contains useful notebooks for data exploration, testing, ...
 
-This project has the following services
+### AWS Lambda
 
-1. `proxy`: a `traefik` reverse proxy.
-1. `restapi`: a FastAPI application, currently not being used, in favor of a lambda function
-1. `jupyter`: a Jupyter notebook server with support for the NVIDIA A100-SXM4-40GB GPU (CUDA 11.6) and contains scripts for training and evaluating models
-1. `streamlit`: a Streamlit application for displaying a user interface
-1. `rubrix`: a Rubrix server for annotating data
-1. `elastic`: an Elasticsearch server for storing data from rubrix
-1. `kibana`: a Kibana server for visualizing data from Elasticsearch
-1. `lambda`: a lambda function for serving predictions
+Please follow the guide [here](/services/lambda/README.md#contributing-to-the-lambda-api-service)
 
-these can be launched using docker compose, and its configuration is shared across many `yml` files that can by chained with the `-f` command. Read more about this in the [docker-compose documentation](https://docs.docker.com/compose/extends/). You will need to provide a `.env` file with variables listed in `.env.sample` for this deployment to work.
+### Streamlit UI
 
-In particular, the following files are used:
-
-- `docker-compose.yml` (`base`) is used to run the project in a container. It supports docker swarm for production but it has not been tested yet.
-- `docker-compose.override.yml` (`override`) is used to run the project in a container with a volume mounted to the host machine. It also has `traefik` labels for the proxy service that work behind a reverse proxy. It also
-- `docker-compose.nvidia.yml` (`nvidia`) extends the `jupyter` container and adds support for GPU usage.
-
-These can be launched using `make`, e.g. `make dev.all.up` will launch all the services combining the `base` and `override` configs. The `Makefile` contains a list of all the commands.
+Please follow the guide [here](/services/streamlit/README.md#contributing-to-the-streamlit-ui-service)
