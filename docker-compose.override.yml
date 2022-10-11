@@ -1,42 +1,81 @@
 version: "3.3"
 services:
   proxy:
-    ports:
-      - "8010:80"
-      - "8090:8080"
-    command:
-      # Enable Docker in Traefik, so that it reads labels from Docker services
-      - --providers.docker
-      # Add a constraint to only use services with the label for this stack
-      # from the env var TRAEFIK_TAG
-      - --providers.docker.constraints=Label(`traefik.constraint-label-stack`, `${TRAEFIK_TAG?Variable not set}`)
-      # Do not expose all Docker services, only the ones explicitly exposed
-      - --providers.docker.exposedbydefault=false
-      # Disable Docker Swarm mode for local development
-      # - --providers.docker.swarmmode
-      # Enable the access log, with HTTP requests
-      - --accesslog
-      # Enable the Traefik log, for configurations and errors
-      - --log
-      # Enable the Dashboard and API
-      - --api
-      # Enable the Dashboard and API in insecure mode for local development
-      - --api.insecure=true
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-public-http.rule=Host(`${DOMAIN?Variable not set}`)
-      - traefik.http.services.${STACK_NAME?Variable not set}-traefik-public.loadbalancer.server.port=80
-      # - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
-      # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.rule=PathPrefix(`/traefik`)
-      # - traefik.http.services.${STACK_NAME?Variable not set}-traefik-dashboard.loadbalancer.server.port=8080
-      # # enable auth on
-      # - traefik.http.routers.${STACK_NAME?Variable not set}-traefik-dashboard-http.middlewares=${STACK_NAME?Variable not set}-traefik-dashboard-auth
-      # - traefik.http.middlewares.${STACK_NAME?Variable not set}-traefik-dashboard-auth.basicauth.users=user:$$2y$$05$$903CSuS1Cd8qfunjKpLXoO3szTEa2RuVj9MA73EfxeoGjeeuGXHsm
+      image: traefik:v2.2
+      networks:
+        - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
+        - default
+        - rubrix
+      ports:
+        - "8010:80"
+        - "8090:8080"
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+      command:
+        # Enable Docker in Traefik, so that it reads labels from Docker services
+        - --providers.docker
+        # Add a constraint to only use services with the label for this stack
+        # from the env var TRAEFIK_TAG
+        - --providers.docker.constraints=Label(`traefik.constraint-label-stack`, `${TRAEFIK_TAG?Variable not set}`)
+        # Do not expose all Docker services, only the ones explicitly exposed
+        - --providers.docker.exposedbydefault=false
+        # (by default) Enable Docker Swarm mode
+        - --providers.docker.swarmmode=${TRAEFIK_DOCKER_SWARM:-true}
+        # Enable the access log, with HTTP requests
+        - --accesslog
+        # Enable the Traefik log, for configurations and errors
+        - --log
+        # Enable the Dashboard and API
+        - --api
+        # (by default) Disable the Dashboard and API in insecure mod
+        - --api.insecure=${TRAEFIK_API_INSECURE:-false}
+      deploy:
+        placement:
+          constraints:
+            - node.role == manager
+        labels:
+          # Enable Traefik for this service, to make it available in the public network
+          - traefik.enable=true
+          # Use the traefik-public network (declared below)
+          - traefik.docker.network=${TRAEFIK_PUBLIC_NETWORK?Variable not set}
+          # Use the custom label "traefik.constraint-label=traefik-public"
+          # This public Traefik will only use services with this label
+          - traefik.constraint-label=${TRAEFIK_PUBLIC_TAG?Variable not set}
+          # traefik-http set up only to use the middleware to redirect to https
+          - traefik.http.middlewares.${STACK_NAME?Variable not set}-https-redirect.redirectscheme.scheme=https
+          - traefik.http.middlewares.${STACK_NAME?Variable not set}-https-redirect.redirectscheme.permanent=true
+          # Handle host with and without "www" to redirect to only one of them
+          # Uses environment variable DOMAIN
+          # To disable www redirection remove the Host() you want to discard, here and
+          # below for HTTPS
+          - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-http.rule=Host(`${DOMAIN?Variable not set}`) || Host(`www.${DOMAIN?Variable not set}`)
+          - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-http.entrypoints=http
+          # traefik-https the actual router using HTTPS
+          - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-https.rule=Host(`${DOMAIN?Variable not set}`) || Host(`www.${DOMAIN?Variable not set}`)
+          - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-https.entrypoints=https
+          - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-https.tls=true
+          # Use the "le" (Let's Encrypt) resolver created below
+          - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-https.tls.certresolver=le
+          # Define the port inside of the Docker service to use
+          - traefik.http.services.${STACK_NAME?Variable not set}-proxy.loadbalancer.server.port=80
+          # Handle domain with and without "www" to redirect to only one
+          # To disable www redirection remove the next line
+          - traefik.http.middlewares.${STACK_NAME?Variable not set}-www-redirect.redirectregex.regex=^https?://(www.)?(${DOMAIN?Variable not set})/(.*)
+          # Redirect a domain with www to non-www
+          # To disable it remove the next line
+          - traefik.http.middlewares.${STACK_NAME?Variable not set}-www-redirect.redirectregex.replacement=https://${DOMAIN?Variable not set}/$${3}
+          # Redirect a domain without www to www
+          # To enable it remove the previous line and uncomment the next
+          # - traefik.http.middlewares.${STACK_NAME}-www-redirect.redirectregex.replacement=https://www.${DOMAIN}/$${3}
+          # Middleware to redirect www, to disable it remove the next line
+          - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-https.middlewares=${STACK_NAME?Variable not set}-www-redirect
+          # Middleware to redirect www, and redirect HTTP to HTTPS
+          # to disable www redirection remove the section: ${STACK_NAME?Variable not set}-www-redirect,
+          - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-http.middlewares=${STACK_NAME?Variable not set}-www-redirect,${STACK_NAME?Variable not set}-https-redirect
+
   lambda:
     ports:
       - 9000:8080
-    volumes:
-      - ./services/lambda/api/app.py:/var/task/app.py
     labels:
       - traefik.enable=true
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
@@ -44,12 +83,6 @@ services:
       - traefik.http.services.${STACK_NAME?Variable not set}-lambda-local.loadbalancer.server.port=8080
 
   jupyter:
-    volumes:
-      - ./services/jupyter/src/notebooks:/src/notebooks
-      - ./services/jupyter/src/app:/src/app
-      - ./services/jupyter/src/pyproject.toml:/src/pyproject.toml
-      - ./services/jupyter/src/poetry.toml:/src/poetry.toml
-      - ./services/jupyter/src/poetry.lock:/src/poetry.lock
     ports:
       - "10000:8888"
     labels:
@@ -57,15 +90,10 @@ services:
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
       - traefik.http.routers.${STACK_NAME?Variable not set}-jupyter-http.rule=PathPrefix(`/jupyter`)
       - traefik.http.services.${STACK_NAME?Variable not set}-jupyter.loadbalancer.server.port=8888
+
   streamlit:
-    volumes:
-      - ./services/streamlit/src/app:/src/app
-      - ./services/streamlit/src/poetry.lock:/src/poetry.lock
-      - ./services/streamlit/src/pyproject.toml:/src/pyproject.toml
-      - ./services/streamlit/src/poetry.toml:/src/poetry.toml
-      # - ./services/streamlit/src/.streamlit:/root/.streamlit
     ports:
-      - "8030:80"
+      - "8502:80"
 
   rubrix:
     ports:
@@ -75,8 +103,6 @@ services:
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
       - traefik.http.routers.${STACK_NAME?Variable not set}-rubrix-http.rule=PathPrefix(`/rubrix`)
       - traefik.http.services.${STACK_NAME?Variable not set}-rubrix.loadbalancer.server.port=80
-      # volumes:
-      #   - ./services/rubrix/src/config/.users.yaml:/config/.users.yaml
 
   elasticsearch:
     ports:
