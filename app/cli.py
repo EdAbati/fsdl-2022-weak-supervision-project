@@ -4,8 +4,9 @@ from app.config import settings
 from app.deploy import register_and_convert_model, register_artifact
 
 app = typer.Typer()
-app.command(register_artifact)
-app.command(register_and_convert_model)
+
+app.command()(register_artifact)
+app.command()(register_and_convert_model)
 
 
 @app.command()
