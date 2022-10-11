@@ -391,7 +391,7 @@
 #                        The string should be of the form type:salt:hashed-
 #  password.
 #  Default: ''
-c.ServerApp.password = "argon2:$argon2id$v=19$m=10240,t=10,p=8$BMCrabx6jDQ6HGA7kvclzA$80qXrsBIzfGU65s/J8xP8jQKYcN5DjLCyrhPFXZemwQ"
+c.ServerApp.password = ""
 
 ## Forces users to use a password for the Jupyter server.
 #                        This is useful in a multi user environment, for instance when
@@ -400,7 +400,7 @@ c.ServerApp.password = "argon2:$argon2id$v=19$m=10240,t=10,p=8$BMCrabx6jDQ6HGA7k
 #                        In such a case, serving on localhost is not secure since
 #                        any user can connect to the Jupyter server via ssh.
 #  Default: False
-c.ServerApp.password_required = True
+c.ServerApp.password_required = False
 
 ## The port the server will listen on (env: JUPYTER_PORT).
 #  Default: 0
@@ -472,7 +472,7 @@ c.ServerApp.password_required = True
 
 ## Supply overrides for terminado. Currently only supports "shell_command".
 #  Default: {}
-# c.ServerApp.terminado_settings = {}
+c.ServerApp.terminado_settings = {"shell_command": ["/bin/bash"]}
 
 ## Set to False to disable terminals.
 #
@@ -495,7 +495,7 @@ c.ServerApp.password_required = True
 #          Setting to an empty string disables authentication altogether, which
 #  is NOT RECOMMENDED.
 #  Default: '<generated>'
-# c.ServerApp.token = '<generated>'
+c.ServerApp.token = ""
 
 ## Supply overrides for the tornado.web.Application that the Jupyter server uses.
 #  Default: {}
