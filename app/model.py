@@ -8,6 +8,7 @@ from transformers import (
     AutoTokenizer,
     Trainer,
     TrainingArguments,
+    DataCollatorWithPadding,
 )
 
 from app.config import NUM_LABELS, settings
@@ -47,46 +48,48 @@ def train_model(
     epochs: int = 1,
     batch_size: int = 64,
 ):
-    train_dataset, val_dataset, _ = load_data()
+    with wandb.init(project=wandb_name) as run:
+        datasets = load_data()
 
-    tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
+        tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
 
-    def tokenize(batch):
-        return tokenizer(batch["text"], padding=True, truncation=True)
+        def tokenize(batch):
+            return tokenizer(batch["text"], truncation=True)
 
-    train_encoded = train_dataset.map(tokenize, batched=True, batch_size=None)
-    val_encoded = val_dataset.map(tokenize, batched=True, batch_size=None)
+        tokenized_datasets = datasets.map(tokenize, batched=True)
+        tokenized_datasets = tokenized_datasets.remove_columns("text")
+        tokenized_datasets.set_format("torch")
 
-    logging_steps = len(train_encoded) // batch_size
-    model_name = f"{model_ckpt}-finetuned-news"
+        data_collator = DataCollatorWithPadding(tokenizer)
 
-    training_args = TrainingArguments(
-        output_dir=model_name,
-        num_train_epochs=epochs,
-        learning_rate=2e-5,
-        per_device_train_batch_size=batch_size,
-        per_device_eval_batch_size=batch_size,
-        weight_decay=0.01,
-        evaluation_strategy="epoch",
-        disable_tqdm=False,
-        logging_steps=logging_steps,
-        push_to_hub=True,
-        report_to="wandb",
-        run_name=wandb_name,
-        log_level="error",
-        hub_token=settings.HF_TOKEN,
-    )
+        logging_steps = len(tokenized_datasets["train"]) // batch_size
+        model_name = f"{model_ckpt}-finetuned-news"
 
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        compute_metrics=compute_metrics,
-        train_dataset=train_encoded,
-        eval_dataset=val_encoded,
-        tokenizer=tokenizer,
-    )
-
-    trainer.train()
+        training_args = TrainingArguments(
+            output_dir=model_name,
+            num_train_epochs=epochs,
+            learning_rate=2e-5,
+            per_device_train_batch_size=batch_size,
+            per_device_eval_batch_size=batch_size,
+            weight_decay=0.01,
+            evaluation_strategy="epoch",
+            disable_tqdm=False,
+            logging_steps=logging_steps,
+            push_to_hub=True,
+            report_to="wandb",
+            log_level="error",
+            hub_token=settings.HF_TOKEN,
+        )
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            compute_metrics=compute_metrics,
+            train_dataset=tokenized_datasets["train"],
+            eval_dataset=tokenized_datasets["validation"],
+            data_collator=data_collator,
+            tokenizer=tokenizer,
+        )
+        trainer.train()
 
     return trainer
 
@@ -126,7 +129,7 @@ def test_routine(model: Optional[Any] = None):
 
     model_ckpt = "distilbert-base-uncased"
 
-    _, _, test_dataset = load_data()
+    test_dataset = load_data(split='test')
 
     w = WandbModelArtifact(
         entity="team_44",
@@ -153,15 +156,13 @@ def train_routine(
     model_ckpt: str = "distilbert-base-uncased",
     epochs: int = 1,
     batch_size: int = 64,
-):
-
+) -> None:
     model = get_model(
         model_ckpt=model_ckpt,
     )
-
     train_model(
         model,
-        wandb_name=model_ckpt + "_test",
+        wandb_name=f"{model_ckpt}_test",
         model_ckpt=model_ckpt,
         epochs=epochs,
         batch_size=batch_size,
