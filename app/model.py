@@ -15,10 +15,12 @@ from app.config import NUM_LABELS, settings
 from app.data import load_data
 from rich import print
 
+DEFAULT_WANDB_ENTITY = "team_44"
 
-def get_model(model_ckpt: str):
+
+def get_model(model_checkpoint: str):
     model = AutoModelForSequenceClassification.from_pretrained(
-        model_ckpt, num_labels=NUM_LABELS
+        model_checkpoint, num_labels=NUM_LABELS
     )
     return model
 
@@ -34,14 +36,14 @@ def compute_metrics(pred):
 def train_model(
     model,
     wandb_name: str,
-    model_ckpt: str,
+    model_checkpoint: str,
     epochs: int = 1,
     batch_size: int = 64,
 ):
-    with wandb.init(project=wandb_name) as run:
+    with wandb.init(project=wandb_name, entity=DEFAULT_WANDB_ENTITY) as run:
         datasets = load_data()
 
-        tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
+        tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 
         def tokenize(batch):
             return tokenizer(batch["text"], truncation=True)
@@ -53,7 +55,7 @@ def train_model(
         data_collator = DataCollatorWithPadding(tokenizer)
 
         logging_steps = len(tokenized_datasets["train"]) // batch_size
-        model_name = f"{model_ckpt}-finetuned-news"
+        model_name = f"{model_checkpoint}-finetuned-news"
 
         training_args = TrainingArguments(
             output_dir=model_name,
@@ -126,20 +128,21 @@ def test_model(model, test_data, tokenizer):
     return trainer.evaluate(test_data)
 
 
-def test_routine(model: Optional[Any] = None) -> None:
+def test_routine(
+    model_checkpoint: str = "distilbert-base-uncased",
+) -> None:
 
     model_ckpt = "distilbert-base-uncased"
 
     test_dataset = load_data(split="test")
 
-    if model is None:
-        w = WandbModelArtifact(
-            entity="team_44",
-            project="model-registry",
-            artifact_name="distilbert-base-uncased-finetuned-news",
-            tag="prod",
-        )
-        model = load_model_from_wandb(w)
+    artifact_details = WandbModelArtifact(
+        entity=DEFAULT_WANDB_ENTITY,
+        project="model-registry",
+        artifact_name=f"{model_checkpoint}-finetuned-news",
+        tag="prod",
+    )
+    model = load_model_from_wandb(artifact_details)
 
     # test model
     tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
@@ -157,17 +160,17 @@ def test_routine(model: Optional[Any] = None) -> None:
 
 
 def train_routine(
-    model_ckpt: str = "distilbert-base-uncased",
+    model_checkpoint: str = "distilbert-base-uncased",
     epochs: int = 1,
     batch_size: int = 64,
 ) -> None:
     model = get_model(
-        model_ckpt=model_ckpt,
+        model_checkpoint=model_checkpoint,
     )
     train_model(
         model,
-        wandb_name=f"{model_ckpt}_test",
-        model_ckpt=model_ckpt,
+        wandb_name=f"{model_checkpoint}_train",
+        model_checkpoint=model_checkpoint,
         epochs=epochs,
         batch_size=batch_size,
     )
