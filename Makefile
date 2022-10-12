@@ -12,12 +12,12 @@ help: ## Print this help
 	@grep -E '^[0-9a-zA-Z_\.-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: conda-env-and-update
-conda-env-and-update: ## create and update a virtual environment using conda
+conda-env-and-update: ## Create and update a virtual environment using conda
 	conda env update --prune -f conda-environment.yml
 	@echo "!!! PLEASE ACTIVATE CONDA ENVIRONMENT !!!"
 
 .PHONY: install-pre-commit
-install-pre-commit: ## install all pre-commit hooks
+install-pre-commit: ## Install all pre-commit hooks
 	pre-commit install --install-hooks
 
 build: ## build docker image
@@ -41,10 +41,10 @@ jupyter.model.train.default: ## train model inside the jupyter container with de
 jupyter.model.train.help: ## Get help for training model inside the jupyter container.
 	@docker compose -f docker-compose.yml -f docker-compose.nvidia.yml exec -it jupyter fsdl-project-cli train --help
 
-dev.all.up: ## start docker-compose in dev mode
+dev.all.up: ## Start docker-compose in dev mode
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
 
-dev.all.up.build: ## start docker-compose in dev mode and --build flag to force rebuild
+dev.all.up.build: ## Start docker-compose in dev mode and --build flag to force rebuild
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --build
 
 dev.all.ps: ## start docker-compose ps
@@ -64,7 +64,7 @@ IMAGE_URI = $(ECR_URI)/$(CONTAINER_NAME)
 
 .PHONY: build_aws_lambda_image
 build_aws_lambda_image: ## Build AWS Lambda docker image locally
-	docker build -t $(CONTAINER_NAME) . -f services/api-serverless/api/Dockerfile --platform=linux/amd64
+	docker build -t $(CONTAINER_NAME) . -f services/lambda/api/Dockerfile --platform=linux/amd64
 
 .PHONY: run_local_aws_lambda
 run_local_aws_lambda: ## Run AWS lambda docker image locally
