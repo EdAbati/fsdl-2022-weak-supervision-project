@@ -17,7 +17,7 @@ Create and start the API as a local docker container using `docker-compose`:
 
 ```bash
 docker compose build lambda
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d lambda
+docker compose -f docker-compose.yml -f docker-compose.override.yml up -d lambda
 ```
 
 Testing with `curl`:

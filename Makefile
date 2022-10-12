@@ -47,10 +47,10 @@ jupyter.model.train.help: ## Get help for training model inside the jupyter cont
 	@docker compose -f docker-compose.yml -f docker-compose.nvidia.yml exec -it jupyter fsdl-project-cli train --help
 
 dev.all.up: ## Start docker-compose in dev mode
-	@docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
 
 dev.all.up.build: ## Start docker-compose in dev mode and --build flag to force rebuild
-	@docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --build
 
 dev.all.ps: ## start docker-compose ps
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml ps

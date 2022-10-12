@@ -38,7 +38,7 @@ If you want to contribute to this service you should:
 
       ```bash
       docker compose build streamlit lambda
-      docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d streamlit lambda
+      docker compose -f docker-compose.yml -f docker-compose.override.yml up -d streamlit lambda
       ```
 2. Make changes to the app code in `app/streamlit_app.py` and commit them to a new branch
 3. Once you are happy with your changes, open a pull request

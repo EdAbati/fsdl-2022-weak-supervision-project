@@ -64,7 +64,6 @@ This project has the following services:
 1. `rubrix`: a Rubrix server for annotating data
 1. `elastic`: an Elasticsearch server for storing data from Rubrix
 1. `kibana`: a Kibana server for visualizing data from Elasticsearch
-1. `proxy`: a `traefik` reverse proxy.
 
 ### Rubrix
 
@@ -99,8 +98,7 @@ All the services can be launched using `docker-compose`, and its configuration i
 In particular, the following files are used:
 
 - `docker-compose.yml` (`base`) is used to run the project in a container. It contains all the services a part from the proxy.
-- `docker-compose.override.yml` (`override`) is used to run the project with `traefik` as a proxy service.
-- `docker-compose.dev.yml` (`dev`) is used to run the project as development environment. It exposes many volumes to allow quick prototyping.
+- `docker-compose.override.yml` (`override`) is used to run the project as development environment. It exposes many volumes to allow quick prototyping.
 - `docker-compose.nvidia.yml` (`nvidia`) extends the `jupyter` container and adds support for GPU usage.
 
 These can be launched using `make`, e.g. `make dev.all.up` will launch all the services combining the `base` and `override` configs. The `Makefile` contains a list of all the commands.
