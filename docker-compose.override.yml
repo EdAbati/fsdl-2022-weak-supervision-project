@@ -5,6 +5,7 @@ services:
       - 9000:8080
     volumes:
       - ./services/lambda/api/app.py:/var/task/app.py
+  
   jupyter:
     volumes:
       - ./services/jupyter/src/notebooks:/src/notebooks
@@ -14,6 +15,7 @@ services:
       - ./services/jupyter/src/poetry.lock:/src/poetry.lock
     ports:
       - "10000:8888"
+  
   streamlit:
     volumes:
       - ./services/streamlit/src/app:/src/app
@@ -27,6 +29,7 @@ services:
   rubrix:
     ports:
       - "6900:80"
+  
   elasticsearch:
     ports:
       - "9200:9200"

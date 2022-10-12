@@ -12,6 +12,7 @@ services:
         - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     networks:
       - rubrix
+  
   lambda:
     image: "${DOCKER_IMAGE_LAMBDA?Variable not set}-api:${TAG-latest}"
     build:
@@ -39,9 +40,9 @@ services:
       - AWS_REGION=${AWS_REGION}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-
     networks:
       - rubrix
+  
   streamlit:
     image: "${DOCKER_IMAGE_STREAMLIT?Variable not set}:${TAG-latest}"
     build:
@@ -54,6 +55,7 @@ services:
       - rubrix
     volumes:
       - streamlit-cachedata:/root/.cache
+  
   rubrix:
     image: recognai/rubrix:latest
     restart: unless-stopped
@@ -82,6 +84,7 @@ services:
       - rubrix
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
+  
   kibana:
     image: docker.elastic.co/kibana/kibana:7.11.1
     environment:
