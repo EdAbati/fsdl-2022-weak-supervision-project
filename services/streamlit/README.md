@@ -29,12 +29,11 @@ Requirements:
 ## Contributing to the Streamlit UI service
 
 0. Navigate to the root of the project
-1. Install `pre-commit` hooks with `make install-pre-commit`
-2. Launch locally the `streamlit` and the `lambda` services using the `dev` config for `docker-compose`. This will mount the local directory to the container and it will allow you to change the local files and see changes in the UI straight away:
+1. Launch locally the `streamlit` and the `lambda` services using the `dev` config for `docker-compose`. This will mount the local directory to the container and it will allow you to change the local files and see changes in the UI straight away:
 
       ```bash
       docker compose build streamlit lambda
       docker compose -f docker-compose.yml -f docker-compose.override.yml up -d streamlit lambda
       ```
-3. Make changes to the code and commit them to a new branch
-4. Once you are happy with your changes, open a pull request
+2. Make changes to the code and commit them to a new branch
+3. Once you are happy with your changes, open a pull request
