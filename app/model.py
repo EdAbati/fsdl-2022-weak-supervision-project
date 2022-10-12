@@ -13,6 +13,7 @@ from transformers import (
 
 from app.config import NUM_LABELS, settings
 from app.data import load_data
+from rich import print
 
 
 def get_model(model_ckpt: str):
@@ -113,31 +114,32 @@ def load_model_from_wandb(
 
     return model
 
+
 def test_model(model, test_data, tokenizer):
+    args = TrainingArguments(output_dir="tmp_test_model", report_to="none")
     trainer = Trainer(
         model=model,
+        args=args,
         tokenizer=tokenizer,
         compute_metrics=compute_metrics,
     )
-    model.eval()
-    trainer.predict(test_data)
-    return trainer
+    return trainer.evaluate(test_data)
 
-def test_routine(model: Optional[Any] = None):
+
+def test_routine(model: Optional[Any] = None) -> None:
 
     model_ckpt = "distilbert-base-uncased"
 
-    test_dataset = load_data(split='test')
-
-    w = WandbModelArtifact(
-        entity="team_44",
-        project="model-registry",
-        artifact_name="distilbert-base-uncased-finetuned-news",
-        tag="prod",
-    )
+    test_dataset = load_data(split="test")
 
     if model is None:
-        load_model_from_wandb(w)
+        w = WandbModelArtifact(
+            entity="team_44",
+            project="model-registry",
+            artifact_name="distilbert-base-uncased-finetuned-news",
+            tag="prod",
+        )
+        model = load_model_from_wandb(w)
 
     # test model
     tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
@@ -145,9 +147,13 @@ def test_routine(model: Optional[Any] = None):
     def tokenize(batch):
         return tokenizer(batch["text"], padding=True, truncation=True)
 
-    test_encoded = test_dataset.map(tokenize, batched=True, batch_size=None)
+    test_tokenized = test_dataset.map(tokenize, batched=True, batch_size=None)
+    test_tokenized = test_tokenized.remove_columns("text")
+    test_tokenized.set_format("torch")
 
-    results = test_model(model, test_encoded, tokenizer)
+    results = test_model(model, test_tokenized, tokenizer)
+    print("[bold]Test Evaluation Metrics:[/bold]")
+    print(results)
 
 
 def train_routine(

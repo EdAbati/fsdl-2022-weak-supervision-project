@@ -25,6 +25,15 @@ def train(
 
 
 @app.command()
+def test():
+    """Test a model and print result to screen"""
+
+    from app.model import test_routine
+
+    test_routine()
+
+
+@app.command()
 def print_settings():
     color = typer.colors.BLUE
     bold = False
