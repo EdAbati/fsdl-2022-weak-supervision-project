@@ -2,18 +2,18 @@ from typing import Any, Optional
 
 import wandb
 from pydantic import BaseModel
+from rich import print
 from sklearn.metrics import accuracy_score, f1_score
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
+    DataCollatorWithPadding,
     Trainer,
     TrainingArguments,
-    DataCollatorWithPadding,
 )
 
 from app.config import NUM_LABELS, settings
 from app.data import load_data
-from rich import print
 
 DEFAULT_WANDB_ENTITY = "team_44"
 
