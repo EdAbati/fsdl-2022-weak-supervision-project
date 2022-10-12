@@ -23,8 +23,6 @@ services:
       - ./app:/src/app
       - ./models:/src/models
       - jupyter-cachedata:/root/.cache
-    ports:
-      - "10000:8888"
     environment:
       - WANDB_LOG_MODEL=true
       - WANDB_DIR=/src
@@ -52,8 +50,6 @@ services:
   rubrix:
     image: recognai/rubrix:latest
     restart: unless-stopped
-    ports:
-      - "6900:80"
     environment:
       ELASTICSEARCH: http://elasticsearch:9200
       # RUBRIX_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
@@ -65,8 +61,6 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
-    ports:
-      - "9200:9200"
     environment:
       - node.name=elasticsearch
       - cluster.name=es-rubrix-local
@@ -84,8 +78,6 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.11.1
-    ports:
-      - 5601:5601
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'

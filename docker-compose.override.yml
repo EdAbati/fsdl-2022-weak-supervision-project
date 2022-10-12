@@ -1,6 +1,5 @@
 version: "3.3"
 services:
-
   lambda:
     volumes:
       - ./services/lambda/api/app.py:/var/task/app.py
