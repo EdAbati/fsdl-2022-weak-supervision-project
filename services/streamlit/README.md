@@ -6,7 +6,7 @@ It consumes an environment variable `LAMBDA_URL` that points to an API endpoint 
 
 ## Screenshot
 
-![screenshot](/docs/screenshot.png)
+![screenshot](/docs/streamlit-UI-screenshot.png)
 
 ## Start UI locally
 
