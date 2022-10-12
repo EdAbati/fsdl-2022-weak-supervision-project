@@ -1,73 +1,24 @@
-from typing import Any, Optional
-
-import boto3
-import torch
 import wandb
-from datasets import ClassLabel, Features, Value, load_dataset
 from pydantic import BaseModel
+from rich import print
 from sklearn.metrics import accuracy_score, f1_score
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
+    DataCollatorWithPadding,
     Trainer,
     TrainingArguments,
 )
 
-from app.config import settings
+from app.config import NUM_LABELS, settings
+from app.data import load_data
 
-NUM_LABELS = 4
-
-
-def load_data(dataset_name: str = "bergr7/weakly_supervised_ag_news") -> tuple:
-
-    # files
-    labeled_data_files = {
-        "train": "train.csv",
-        "validation": "validation.csv",
-        "test": "test.csv",
-    }
-
-    unlabeled_data_files = {"unlabeled": "unlabeled_train.csv"}
-    # features
-    labeled_features = Features(
-        {
-            "text": Value("string"),
-            "label": ClassLabel(
-                num_classes=4,
-                names=["World", "Sports", "Business", "Sci/Tech"],
-            ),
-        }
-    )
-    unlabeled_features = Features({"text": Value("string")})
-
-    # load data
-    labeled_dataset_train = load_dataset(
-        dataset_name,
-        data_files=labeled_data_files,
-        features=labeled_features,
-        split="train",
-    )
-
-    labeled_dataset_val = load_dataset(
-        dataset_name,
-        data_files=labeled_data_files,
-        features=labeled_features,
-        split="validation",
-    )
-
-    labeled_dataset_test = load_dataset(
-        dataset_name,
-        data_files=labeled_data_files,
-        features=labeled_features,
-        split="test",
-    )
-
-    return labeled_dataset_train, labeled_dataset_val, labeled_dataset_test
+DEFAULT_WANDB_ENTITY = "team_44"
 
 
-def get_model(model_ckpt: str):
+def get_model(model_checkpoint: str):
     model = AutoModelForSequenceClassification.from_pretrained(
-        model_ckpt, num_labels=NUM_LABELS
+        model_checkpoint, num_labels=NUM_LABELS
     )
     return model
 
@@ -80,70 +31,56 @@ def compute_metrics(pred):
     return {"accuracy": acc, "f1": f1}
 
 
-def test_model(model, test_data, tokenizer):
-
-    trainer = Trainer(
-        model=model,
-        tokenizer=tokenizer,
-        compute_metrics=compute_metrics,
-    )
-
-    model.eval()
-
-    trainer.predict(test_data)
-
-    return trainer
-
-
 def train_model(
     model,
     wandb_name: str,
-    model_ckpt: str,
+    model_checkpoint: str,
     epochs: int = 1,
     batch_size: int = 64,
 ):
+    with wandb.init(project="huggingface", entity=DEFAULT_WANDB_ENTITY) as run:
+        datasets = load_data()
 
-    train_dataset, val_dataset, _ = load_data()
+        tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 
-    tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
+        def tokenize(batch):
+            return tokenizer(batch["text"], truncation=True)
 
-    def tokenize(batch):
-        return tokenizer(batch["text"], padding=True, truncation=True)
+        tokenized_datasets = datasets.map(tokenize, batched=True)
+        tokenized_datasets = tokenized_datasets.remove_columns("text")
+        tokenized_datasets.set_format("torch")
 
-    train_encoded = train_dataset.map(tokenize, batched=True, batch_size=None)
-    val_encoded = val_dataset.map(tokenize, batched=True, batch_size=None)
+        data_collator = DataCollatorWithPadding(tokenizer)
 
-    logging_steps = len(train_encoded) // batch_size
-    model_name = f"{model_ckpt}-finetuned-news"
+        logging_steps = len(tokenized_datasets["train"]) // batch_size
+        model_name = f"{model_checkpoint}-finetuned-news"
 
-    training_args = TrainingArguments(
-        output_dir=model_name,
-        num_train_epochs=epochs,
-        learning_rate=2e-5,
-        per_device_train_batch_size=batch_size,
-        per_device_eval_batch_size=batch_size,
-        weight_decay=0.01,
-        evaluation_strategy="epoch",
-        # optim="adamw_torch",
-        disable_tqdm=False,
-        logging_steps=logging_steps,
-        push_to_hub=True,
-        report_to="wandb",
-        run_name=wandb_name,  # "distill-bert-base-config",
-        log_level="error",
-        hub_token=settings.HF_TOKEN,
-    )
-
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        compute_metrics=compute_metrics,
-        train_dataset=train_encoded,
-        eval_dataset=val_encoded,
-        tokenizer=tokenizer,
-    )
-
-    trainer.train()
+        training_args = TrainingArguments(
+            output_dir=model_name,
+            num_train_epochs=epochs,
+            learning_rate=2e-5,
+            per_device_train_batch_size=batch_size,
+            per_device_eval_batch_size=batch_size,
+            weight_decay=0.01,
+            evaluation_strategy="epoch",
+            disable_tqdm=False,
+            logging_steps=logging_steps,
+            push_to_hub=True,
+            run_name=wandb_name,
+            report_to="wandb",
+            log_level="error",
+            hub_token=settings.HF_TOKEN,
+        )
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            compute_metrics=compute_metrics,
+            train_dataset=tokenized_datasets["train"],
+            eval_dataset=tokenized_datasets["validation"],
+            data_collator=data_collator,
+            tokenizer=tokenizer,
+        )
+        trainer.train()
 
     return trainer
 
@@ -180,8 +117,8 @@ def load_model_from_wandb(
     artifact_params: WandbModelArtifact, return_dir: bool = False
 ):
 
-    run = wandb.init()
-    artifact = run.use_artifact(str(artifact_params), type="model")
+    api = wandb.Api()
+    artifact = api.artifact(str(artifact_params), type="model")
     artifact_dir = artifact.download()
 
     if return_dir:
@@ -196,21 +133,32 @@ def load_model_from_wandb(
     return model
 
 
-def test_routine(model: Optional[Any] = None):
+def test_model(model, test_data, tokenizer):
+    args = TrainingArguments(output_dir="tmp_test_model", report_to="none")
+    trainer = Trainer(
+        model=model,
+        args=args,
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics,
+    )
+    return trainer.evaluate(test_data)
+
+
+def test_routine(
+    model_checkpoint: str = "distilbert-base-uncased",
+) -> None:
 
     model_ckpt = "distilbert-base-uncased"
 
-    _, _, test_dataset = load_data()
+    test_dataset = load_data(split="test")
 
-    w = WandbModelArtifact(
-        entity="team_44",
+    artifact_details = WandbModelArtifact(
+        entity=DEFAULT_WANDB_ENTITY,
         project="model-registry",
-        artifact_name="distilbert-base-uncased-finetuned-news",
-        tag="v0",
+        artifact_name=f"{model_checkpoint}-finetuned-news",
+        tag="prod",
     )
-
-    if model is None:
-        load_model_from_wandb(w)
+    model = load_model_from_wandb(artifact_details)
 
     # test model
     tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
@@ -218,73 +166,27 @@ def test_routine(model: Optional[Any] = None):
     def tokenize(batch):
         return tokenizer(batch["text"], padding=True, truncation=True)
 
-    test_encoded = test_dataset.map(tokenize, batched=True, batch_size=None)
+    test_tokenized = test_dataset.map(tokenize, batched=True, batch_size=None)
+    test_tokenized = test_tokenized.remove_columns("text")
+    test_tokenized.set_format("torch")
 
-    results = test_model(model, test_encoded, tokenizer)
-
-
-def convert_model_to_torchscript(
-    model_dir: str, model_ckpt: str
-) -> torch.jit.ScriptModule:
-    """Convert a saved model into TorchScript using tracing."""
-
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_dir, num_labels=NUM_LABELS, torchscript=True
-    )
-
-    # Create example input with
-    # First row in 'ag_news' training dataset
-    dummy_input = {
-        "text": "Wall St. Bears Claw Back Into the Black (Reuters) Reuters - Short-sellers, Wall Street's dwindling\\band of ultra-cynics, are seeing green again.",
-        "label": 2,
-    }
-
-    # load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
-
-    dummy_tokenized_input = tokenizer(
-        dummy_input["text"], truncation=True, return_tensors="pt"
-    )
-
-    return torch.jit.trace(model, tuple(dummy_tokenized_input.values()))
-
-
-def convert_routine():
-    model_ckpt = "distilbert-base-uncased"
-
-    w = WandbModelArtifact(
-        entity="team_44",
-        project="model-registry",
-        artifact_name="distilbert-base-uncased-finetuned-news",
-        tag="v0",
-    )
-
-    model_dir = load_model_from_wandb(w, return_dir=True)
-
-    out = convert_model_to_torchscript(
-        model_dir=model_dir,
-        model_ckpt=model_ckpt,
-    )
-
-    out.save("model.pt")
-
-    return out
+    results = test_model(model, test_tokenized, tokenizer)
+    print("[bold]Test Evaluation Metrics:[/bold]")
+    print(results)
 
 
 def train_routine(
-    model_ckpt: str = "distilbert-base-uncased",
+    model_checkpoint: str = "distilbert-base-uncased",
     epochs: int = 1,
     batch_size: int = 64,
-):
-
+) -> None:
     model = get_model(
-        model_ckpt=model_ckpt,
+        model_checkpoint=model_checkpoint,
     )
-
     train_model(
         model,
-        wandb_name=model_ckpt + "_test",
-        model_ckpt=model_ckpt,
+        wandb_name=f"{model_checkpoint}_test",
+        model_checkpoint=model_checkpoint,
         epochs=epochs,
         batch_size=batch_size,
     )
