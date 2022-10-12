@@ -138,3 +138,4 @@ docker-compose.yml
 
 # Weight & Biases
 wandb/
+artifacts/
