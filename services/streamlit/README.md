@@ -15,16 +15,14 @@ Requirements:
 - [Docker](https://docs.docker.com/get-docker/)
 
 1. Make sure the `lambda` API service is up on running or start it. More info [here](/services/lambda/README.md#start-api-locally-in-a-docker-container)
-2. Use the `docker-compose` file (in the root of the project) to build and launch the `streamlit` service:
+2. Use the `docker-compose` file (in the root of the project) to build and launch the `streamlit` service and pass the `override` config to set the ports and mount the local directory to the container:
 
    ```bash
    docker compose build streamlit
-   docker compose -f docker-compose.yml up -d streamlit
+   docker compose -f docker-compose.yml -f docker-compose.override.yml up -d streamlit
    ```
 
-   pass the `override` config to mount the local directory to the container:
-
-3. Access the UI at http://localhost:8501/
+3. Access the UI at http://localhost:8030/dashboard
 
 ## Contributing to the Streamlit UI service
 
