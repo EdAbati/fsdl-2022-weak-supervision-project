@@ -6,17 +6,17 @@ app = typer.Typer()
 
 @app.command()
 def train(
-    wandb_name: str = typer.Argument(
-        "distilbert-base-uncased", help="Name for Weights and Biases Logging"
+    model_ckpt: list[str] = typer.Option(
+        ["distilbert-base-uncased"], help="List of Models in case of sweep."
     ),
-    epochs: int = typer.Argument(1, help="number of epochs"),
-    batch_size: int = typer.Argument(64, help="batch size"),
+    epochs : list[int] = typer.Option([1], help="List of number of epochs in case of sweep."),
+    batch_size : list[int] = typer.Option([64], help="List of batch size"),
+    sweep: bool = typer.Argument(False,help="If we want to run sweep")
 ):
     """Trains a model and pushes an artifact to weights and biases"""
 
     from app.model.train_model import train_routine
-
-    train_routine(model_ckpt=wandb_name, epochs=epochs, batch_size=batch_size)
+    train_routine(model_ckpt=model_ckpt,epochs=epochs,batch_size=batch_size,sweep=sweep)
 
 
 @app.command()

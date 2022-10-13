@@ -12,6 +12,7 @@ from transformers import (
     AutoTokenizer,
     Trainer,
     TrainingArguments,
+    DataCollatorWithPadding
 )
 
 NUM_LABELS = 4
@@ -95,22 +96,25 @@ def test_model(model, test_data, tokenizer):
 
 
 def train_model(
-    model,
-    wandb_name: str,
-    model_ckpt: str,
-    epochs: int = 1,
-    batch_size: int = 64,
+    config=None
 ):
+    with wandb.init(config=config):
+        # set sweep configuration
+        config = wandb.config
+        batch_size = config.batch_size
+        epochs = config.epochs
+        model_ckpt = config.model_ckpt
 
     train_dataset, val_dataset, _ = load_data()
 
     tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
+    data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     def tokenize(batch):
-        return tokenizer(batch["text"], padding=True, truncation=True)
+        return tokenizer(batch["text"], truncation=True)
 
-    train_encoded = train_dataset.map(tokenize, batched=True, batch_size=None)
-    val_encoded = val_dataset.map(tokenize, batched=True, batch_size=None)
+    train_encoded = train_dataset.map(tokenize, batched=True, batch_size=None).remove_columns('text')
+    val_encoded = val_dataset.map(tokenize, batched=True, batch_size=None).remove_columns('text')
 
     logging_steps = len(train_encoded) // batch_size
     model_name = f"{model_ckpt}-finetuned-news"
@@ -128,18 +132,18 @@ def train_model(
         logging_steps=logging_steps,
         push_to_hub=True,
         report_to="wandb",
-        run_name=wandb_name,  # "distill-bert-base-config",
         log_level="error",
         hub_token=settings.HF_TOKEN,
     )
 
     trainer = Trainer(
-        model=model,
+        model=get_model(model_ckpt),
         args=training_args,
         compute_metrics=compute_metrics,
         train_dataset=train_encoded,
         eval_dataset=val_encoded,
         tokenizer=tokenizer,
+        data_collator=data_collator,
     )
 
     trainer.train()
@@ -270,24 +274,43 @@ def convert_routine():
     return out
 
 
+def do_sweep(model_ckpt,batch_size,epochs):
+    sweep_params = {}
+    sweep_available_params = {
+        "model_ckpt":{"values":model_ckpt},
+        "epochs": {"values": epochs},
+        'batch_size': {'values': batch_size},
+    }
+    
+    params = list(sweep_available_params.keys())
+    
+    for p in params:
+        sweep_params[p] = sweep_available_params[p]
+         
+    sweep_config = {
+        "name": "test-sweep",
+        "method": "grid",  # random, #grid
+        "parameters": sweep_params,
+    }
+    sweep_id = wandb.sweep(sweep_config,entity="team_44",project="huggingface")
+    wandb.agent(sweep_id, train_model)
+
 def train_routine(
-    model_ckpt: str = "distilbert-base-uncased",
-    epochs: int = 1,
-    batch_size: int = 64,
+    model_ckpt:list[str] =["distilbert-base-uncased"],
+    epochs:list[int]=[1],
+    batch_size:list[int]=[64],
+    sweep:bool = False
 ):
-
-    model = get_model(
-        model_ckpt=model_ckpt,
-    )
-
-    train_model(
-        model,
-        wandb_name=model_ckpt + "_test",
-        model_ckpt=model_ckpt,
-        epochs=epochs,
-        batch_size=batch_size,
-    )
-
+    
+    if sweep:
+        do_sweep(model_ckpt,batch_size,epochs)
+    else:
+        default_config = {
+        "model_ckpt":model_ckpt[0],
+        "batch_size": batch_size[0],
+        "epochs":epochs[0],
+        }
+        train_model(config=default_config)
 
 if __name__ == "__main__":
     train_routine()
