@@ -135,3 +135,7 @@ dmypy.json
 models/*
 !models/README.md
 docker-compose.yml
+
+# Weight & Biases
+wandb/
+artifacts/
