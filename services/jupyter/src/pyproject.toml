@@ -26,7 +26,6 @@ transformers = "^4.22.2"
 typer = "^0.6.1"
 wandb = "^0.13.3"
 boto3 = {version = "^1.24.89", source = "pypi"}
-python-dotenv = "^0.21.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
