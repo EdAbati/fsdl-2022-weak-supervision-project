@@ -134,7 +134,9 @@ dmypy.json
 # Models folder is part of the repo, but the artifacts will be ignored.
 models/*
 !models/README.md
-docker-compose.yml
+
+# small_text active Learning
+.active_learning_lib_cache/
 
 # Weight & Biases
 wandb/

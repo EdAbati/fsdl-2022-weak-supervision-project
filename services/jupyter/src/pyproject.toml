@@ -26,6 +26,12 @@ transformers = "^4.22.2"
 typer = "^0.6.1"
 wandb = "^0.13.3"
 boto3 = {version = "^1.24.89", source = "pypi"}
+rubrix = {extras = ["listeners"], version = "^0.18.0"}
+loguru = "^0.6.0"
+snorkel = {version = "^0.9.9", source = "pypi"}
+modAL = "^0.4.1"
+skorch = "^0.12.0"
+small-text = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"

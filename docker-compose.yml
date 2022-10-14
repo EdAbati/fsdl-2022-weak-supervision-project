@@ -40,6 +40,8 @@ services:
       - AWS_REGION=${AWS_REGION}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - RUBRIX_API_URL=${RUBRIX_API_URL-http://rubrix:80}
+
     networks:
       - rubrix
 
@@ -62,7 +64,7 @@ services:
     environment:
       ELASTICSEARCH: http://elasticsearch:9200
       # RUBRIX_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
-      RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD: ${RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD-$$2y$$05$$X1i7R1R7CeFyD/dxZ5ttu.FcJQbL2Gh30.86OxCxzTXl/BR.RO.6O}
+      # RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD: ${RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD-$$2y$$05$$X1i7R1R7CeFyD/dxZ5ttu.FcJQbL2Gh30.86OxCxzTXl/BR.RO.6O}
     # volumes:
     #   - ./services/rubrix/src/config/.users.yaml:/config/.users.yaml
     networks:
