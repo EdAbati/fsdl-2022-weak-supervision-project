@@ -8,8 +8,8 @@ Team 44:
 
 - Aleks Hiidenhovi: [alekshiidenhovi](https://github.com/alekshiidenhovi)
 - Bernardo García: [bergr7](https://github.com/bergr7)
-- Edoardo Abati: [EdAbati](https://github.com/EdAbati)
 - Diego Quintana: [diegoquintanav](https://github.com/diegoquintanav)
+- Edoardo Abati: [EdAbati](https://github.com/EdAbati)
 - Juan Manuel: [jmpc11](https://github.com/jmpc11)
 - Kushal Atul Ramaiya: [ramaiyaKushal](https://github.com/ramaiyaKushal)
 
