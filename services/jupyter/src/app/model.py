@@ -31,10 +31,10 @@ def compute_metrics(pred):
     return {"accuracy": acc, "f1": f1}
 
 
-def train_model(
-    config=None
-):
-    with wandb.init(project="huggingface", entity=DEFAULT_WANDB_ENTITY,config=config) as run:
+def train_model(config=None):
+    with wandb.init(
+        project="huggingface", entity=DEFAULT_WANDB_ENTITY, config=config
+    ) as run:
         # set sweep configuration
         config = wandb.config
         batch_size = config.batch_size
@@ -149,7 +149,6 @@ def test_routine(
     model_checkpoint: str = "distilbert-base-uncased",
 ) -> None:
 
-
     test_dataset = load_data(split="test")
 
     artifact_details = WandbModelArtifact(
@@ -175,43 +174,47 @@ def test_routine(
     print(results)
 
 
-def do_sweep(model_checkpoint,batch_size,epochs):
+def do_sweep(model_checkpoint, batch_size, epochs):
     sweep_params = {}
     sweep_available_params = {
-        "model_checkpoint":{"values":model_checkpoint},
+        "model_checkpoint": {"values": model_checkpoint},
         "epochs": {"values": epochs},
-        'batch_size': {'values': batch_size},
+        "batch_size": {"values": batch_size},
     }
-    
+
     params = list(sweep_available_params.keys())
-    
+
     for p in params:
         sweep_params[p] = sweep_available_params[p]
-         
+
     sweep_config = {
         "name": "test-sweep",
         "method": "grid",  # random, #grid
         "parameters": sweep_params,
     }
-    sweep_id = wandb.sweep(sweep_config,entity="team_44",project="huggingface")
+    sweep_id = wandb.sweep(
+        sweep_config, entity="team_44", project="huggingface"
+    )
     wandb.agent(sweep_id, train_model)
 
+
 def train_routine(
-    model_checkpoint:list[str] =["distilbert-base-uncased"],
-    epochs:list[int]=[1],
-    batch_size:list[int]=[64],
-    sweep:bool = False
+    model_checkpoint: list[str] = ["distilbert-base-uncased"],
+    epochs: list[int] = [1],
+    batch_size: list[int] = [64],
+    sweep: bool = False,
 ) -> None:
-    
+
     if sweep:
-        do_sweep(model_checkpoint,batch_size,epochs)
+        do_sweep(model_checkpoint, batch_size, epochs)
     else:
         default_config = {
-        "model_checkpoint":model_checkpoint[0],
-        "batch_size": batch_size[0],
-        "epochs":epochs[0],
+            "model_checkpoint": model_checkpoint[0],
+            "batch_size": batch_size[0],
+            "epochs": epochs[0],
         }
         train_model(config=default_config)
+
 
 if __name__ == "__main__":
     train_routine()
