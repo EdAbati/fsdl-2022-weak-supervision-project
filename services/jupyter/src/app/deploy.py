@@ -1,19 +1,24 @@
+import json
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
+import boto3
 import torch
 import typer
 import wandb
 from rich import print
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from app.config import NUM_LABELS
+from app.config import NUM_LABELS, settings
 
 # Paths
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_MODELS_PATH = PROJECT_ROOT / "models"
 LOCAL_WANDB_ARTIFACTS_PATH = LOCAL_MODELS_PATH / "wandb_artifacts"
 DEFAULT_TRACED_MODEL_PATH = LOCAL_MODELS_PATH / "traced_model.pt"
+DEFAULT_TRACED_MODEL_METADATA_PATH = (
+    LOCAL_MODELS_PATH / "traced_model_metadata.json"
+)
 
 # Model Constants
 DEFAULT_PRETRAINED_MODEL_NAME = "distilbert-base-uncased"
@@ -26,6 +31,23 @@ DEFAULT_WANDB_MODEL_REGISTRY__ARTIFACT_ALIAS = "prod"
 TYPER_ARTIFACT_NAME_HELP = "The name of the W&B model artifact to be used in the format [entity]/[project]/[artifact_name]:[alias]"
 TYPER_MODEL_NAME_HELP = "The name of the W&B model in the registry in the format [entity]/[project]/[model_name]"
 TYPER_MODEL_ALIAS_HELP = "Alias of the model to be used in the W&B model registry. You can pass this option multiple times to register multiple aliases."
+
+
+def upload_to_s3_bucket(
+    torchscript_dir: str = DEFAULT_TRACED_MODEL_PATH,
+    bucket_name: str = "fsdl-model-test",
+    s3_filename: str = "traced-model.pt",
+):
+    s3 = boto3.client(
+        "s3",
+        settings.AWS_REGION,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    )
+
+    # upload file from local directory to s3 bucket
+    with open(torchscript_dir, "rb") as f:
+        s3.upload_fileobj(f, bucket_name, s3_filename)
 
 
 def register_artifact(
@@ -101,13 +123,33 @@ def register_and_convert_model(
         default=[DEFAULT_WANDB_MODEL_REGISTRY__ARTIFACT_ALIAS],
         help=TYPER_MODEL_ALIAS_HELP,
     ),
+    upload_to_s3: bool = typer.Option(
+        True, help="Upload the model to S3 bucket"
+    ),
 ):
-    """Register a model in the Model Registry, convert it to TorchScript and store it locally."""
+    """Register a model in the Model Registry, convert it to TorchScript and store it locally and in a S3 bucket."""
     model_artifact = register_artifact(artifact_name, model_name, model_alias)
+
     model_local_dir = model_artifact.download(root=LOCAL_WANDB_ARTIFACTS_PATH)
     print(f"Saved artifact model to '{LOCAL_WANDB_ARTIFACTS_PATH}'")
     traced_model = convert_model_to_torchscript(model_dir=model_local_dir)
     print(f"Saving traced model in '{DEFAULT_TRACED_MODEL_PATH}'...")
     torch.jit.save(traced_model, DEFAULT_TRACED_MODEL_PATH)
     print("[green]Model successfully registered, converted and saved![/green]")
+
+    if upload_to_s3 is True:
+        with open(DEFAULT_TRACED_MODEL_METADATA_PATH, "wt") as f:
+            f.write(json.dumps(model_artifact.metadata))
+
+        # upload traced model to s3
+        upload_to_s3_bucket(torchscript_dir=DEFAULT_TRACED_MODEL_PATH)
+        print("[green]Traced model successfully saved to S3 bucket![/green]")
+
+        # upload metadata to s3
+        upload_to_s3_bucket(
+            torchscript_dir=DEFAULT_TRACED_MODEL_METADATA_PATH,
+            s3_filename="traced-model-metadata.json",
+        )
+        print("[green]Model metadata successfully saved to S3 bucket![/green]")
+
     return DEFAULT_TRACED_MODEL_PATH
