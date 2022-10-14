@@ -32,55 +32,56 @@ def compute_metrics(pred):
 
 
 def train_model(
-    model,
-    wandb_name: str,
-    model_checkpoint: str,
-    epochs: int = 1,
-    batch_size: int = 64,
+    config=None
 ):
-    with wandb.init(project="huggingface", entity=DEFAULT_WANDB_ENTITY) as run:
-        datasets = load_data()
+    with wandb.init(project="huggingface", entity=DEFAULT_WANDB_ENTITY,config=config) as run:
+        # set sweep configuration
+        config = wandb.config
+        batch_size = config.batch_size
+        epochs = config.epochs
+        model_checkpoint = config.model_checkpoint
 
-        tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
+    datasets = load_data()
 
-        def tokenize(batch):
-            return tokenizer(batch["text"], truncation=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 
-        tokenized_datasets = datasets.map(tokenize, batched=True)
-        tokenized_datasets = tokenized_datasets.remove_columns("text")
-        tokenized_datasets.set_format("torch")
+    def tokenize(batch):
+        return tokenizer(batch["text"], truncation=True)
 
-        data_collator = DataCollatorWithPadding(tokenizer)
+    tokenized_datasets = datasets.map(tokenize, batched=True)
+    tokenized_datasets = tokenized_datasets.remove_columns("text")
+    tokenized_datasets.set_format("torch")
 
-        logging_steps = len(tokenized_datasets["train"]) // batch_size
-        model_name = f"{model_checkpoint}-finetuned-news"
+    data_collator = DataCollatorWithPadding(tokenizer)
 
-        training_args = TrainingArguments(
-            output_dir=model_name,
-            num_train_epochs=epochs,
-            learning_rate=2e-5,
-            per_device_train_batch_size=batch_size,
-            per_device_eval_batch_size=batch_size,
-            weight_decay=0.01,
-            evaluation_strategy="epoch",
-            disable_tqdm=False,
-            logging_steps=logging_steps,
-            push_to_hub=True,
-            run_name=wandb_name,
-            report_to="wandb",
-            log_level="error",
-            hub_token=settings.HF_TOKEN,
-        )
-        trainer = Trainer(
-            model=model,
-            args=training_args,
-            compute_metrics=compute_metrics,
-            train_dataset=tokenized_datasets["train"],
-            eval_dataset=tokenized_datasets["validation"],
-            data_collator=data_collator,
-            tokenizer=tokenizer,
-        )
-        trainer.train()
+    logging_steps = len(tokenized_datasets["train"]) // batch_size
+    model_name = f"{model_checkpoint}-finetuned-news"
+
+    training_args = TrainingArguments(
+        output_dir=model_name,
+        num_train_epochs=epochs,
+        learning_rate=2e-5,
+        per_device_train_batch_size=batch_size,
+        per_device_eval_batch_size=batch_size,
+        weight_decay=0.01,
+        evaluation_strategy="epoch",
+        disable_tqdm=False,
+        logging_steps=logging_steps,
+        push_to_hub=True,
+        report_to="wandb",
+        log_level="error",
+        hub_token=settings.HF_TOKEN,
+    )
+    trainer = Trainer(
+        model=get_model(model_checkpoint),
+        args=training_args,
+        compute_metrics=compute_metrics,
+        train_dataset=tokenized_datasets["train"],
+        eval_dataset=tokenized_datasets["validation"],
+        data_collator=data_collator,
+        tokenizer=tokenizer,
+    )
+    trainer.train()
 
     return trainer
 
@@ -148,7 +149,6 @@ def test_routine(
     model_checkpoint: str = "distilbert-base-uncased",
 ) -> None:
 
-    model_ckpt = "distilbert-base-uncased"
 
     test_dataset = load_data(split="test")
 
@@ -161,7 +161,7 @@ def test_routine(
     model = load_model_from_wandb(artifact_details)
 
     # test model
-    tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
+    tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 
     def tokenize(batch):
         return tokenizer(batch["text"], padding=True, truncation=True)
@@ -175,22 +175,43 @@ def test_routine(
     print(results)
 
 
-def train_routine(
-    model_checkpoint: str = "distilbert-base-uncased",
-    epochs: int = 1,
-    batch_size: int = 64,
-) -> None:
-    model = get_model(
-        model_checkpoint=model_checkpoint,
-    )
-    train_model(
-        model,
-        wandb_name=f"{model_checkpoint}_test",
-        model_checkpoint=model_checkpoint,
-        epochs=epochs,
-        batch_size=batch_size,
-    )
+def do_sweep(model_checkpoint,batch_size,epochs):
+    sweep_params = {}
+    sweep_available_params = {
+        "model_checkpoint":{"values":model_checkpoint},
+        "epochs": {"values": epochs},
+        'batch_size': {'values': batch_size},
+    }
+    
+    params = list(sweep_available_params.keys())
+    
+    for p in params:
+        sweep_params[p] = sweep_available_params[p]
+         
+    sweep_config = {
+        "name": "test-sweep",
+        "method": "grid",  # random, #grid
+        "parameters": sweep_params,
+    }
+    sweep_id = wandb.sweep(sweep_config,entity="team_44",project="huggingface")
+    wandb.agent(sweep_id, train_model)
 
+def train_routine(
+    model_checkpoint:list[str] =["distilbert-base-uncased"],
+    epochs:list[int]=[1],
+    batch_size:list[int]=[64],
+    sweep:bool = False
+) -> None:
+    
+    if sweep:
+        do_sweep(model_checkpoint,batch_size,epochs)
+    else:
+        default_config = {
+        "model_checkpoint":model_checkpoint[0],
+        "batch_size": batch_size[0],
+        "epochs":epochs[0],
+        }
+        train_model(config=default_config)
 
 if __name__ == "__main__":
     train_routine()
