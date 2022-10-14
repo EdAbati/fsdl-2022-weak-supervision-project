@@ -11,19 +11,25 @@ app.command()(register_and_convert_model)
 
 @app.command()
 def train(
-    model_checkpoint: str = typer.Option(
-        "distilbert-base-uncased",
-        help="Name of the HF pretrained model to fine tune.",
+    model_checkpoint: list[str] = typer.Option(
+        ["distilbert-base-uncased"],
+        help="List of HF pretrained models for sweep.",
     ),
-    epochs: int = typer.Option(1, help="Number of epochs"),
-    batch_size: int = typer.Option(64, help="Batch size"),
+    epochs: list[int] = typer.Option(
+        [1], help="List of number of epochs for sweep."
+    ),
+    batch_size: list[int] = typer.Option([64], help="List of batch size"),
+    sweep: bool = typer.Argument(False, help="If we want to run sweep"),
 ):
     """Trains a model and pushes an artifact to weights and biases"""
 
     from app.model import train_routine
 
     train_routine(
-        model_checkpoint=model_checkpoint, epochs=epochs, batch_size=batch_size
+        model_checkpoint=model_checkpoint,
+        epochs=epochs,
+        batch_size=batch_size,
+        sweep=sweep,
     )
 
 
